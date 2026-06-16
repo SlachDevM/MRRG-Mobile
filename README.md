@@ -11,3 +11,5 @@ Backend API
 This mobile app requires the MRRG backend to be running:
 
 http://10.0.2.2:4000
+
+Backend repository: https://github.com/SlachDevM/MRRG
