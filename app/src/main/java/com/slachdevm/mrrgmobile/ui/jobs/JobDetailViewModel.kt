@@ -8,6 +8,12 @@ import androidx.lifecycle.viewModelScope
 import com.slachdevm.mrrgmobile.data.repository.JobRepository
 import com.slachdevm.mrrgmobile.domain.model.Job
 import com.slachdevm.mrrgmobile.ui.components.snackbar.AppSnackbarManager
+import com.slachdevm.mrrgmobile.ui.components.snackbar.SnackbarMessages.AFTER_PHOTO
+import com.slachdevm.mrrgmobile.ui.components.snackbar.SnackbarMessages.BEFORE_PHOTO
+import com.slachdevm.mrrgmobile.ui.components.snackbar.SnackbarMessages.JOB_COMPLETED
+import com.slachdevm.mrrgmobile.ui.components.snackbar.SnackbarMessages.JOB_UPDATE_FAILED
+import com.slachdevm.mrrgmobile.ui.components.snackbar.SnackbarMessages.NETWORK_ERROR
+import com.slachdevm.mrrgmobile.ui.components.snackbar.SnackbarMessages.NOTES_SAVED
 import kotlinx.coroutines.launch
 
 data class JobDetailUiState(
@@ -35,10 +41,8 @@ class JobDetailViewModel(
             uiState = uiState.copy(isLoading = true, error = null)
             val result = repository.getJobDetails(jobId)
             uiState = if (result.isSuccess) {
-                AppSnackbarManager.showSuccess("Job loaded successfully")
                 uiState.copy(job = result.getOrNull(), isLoading = false)
             } else {
-                AppSnackbarManager.showError("Failed to load job")
                 uiState.copy(isLoading = false, error = result.exceptionOrNull()?.message ?: "Failed to load job")
             }
         }
@@ -47,7 +51,7 @@ class JobDetailViewModel(
     fun updateNotes(notes: String) {
         val currentJob = uiState.job ?: return
         val updatedJob = currentJob.copy(notes = notes)
-        updateJob(updatedJob, successMessage = "Notes saved")
+        updateJob(updatedJob, successMessage = NOTES_SAVED)
     }
 
     fun addPhoto(url: String, isBefore: Boolean) {
@@ -60,9 +64,9 @@ class JobDetailViewModel(
             afterPhotos = updatedAfter
         )
         updateJob(updatedJob, successMessage = if (isBefore) {
-            "Before photo uploaded"
+            BEFORE_PHOTO
         } else {
-            "After photo uploaded"
+            AFTER_PHOTO
         })
     }
 
@@ -92,7 +96,7 @@ class JobDetailViewModel(
                         error = result.exceptionOrNull()?.message ?: "Unable to update job"
                     )
 
-                    AppSnackbarManager.showError("Unable to update job")
+                    AppSnackbarManager.showError(JOB_UPDATE_FAILED)
                 }
             } catch (e: Exception) {
                 uiState = uiState.copy(
@@ -100,7 +104,7 @@ class JobDetailViewModel(
                     error = e.message ?: "Unexpected error"
                 )
 
-                AppSnackbarManager.showError("Unexpected error")
+                AppSnackbarManager.showError(NETWORK_ERROR)
             }
         }
     }
@@ -110,10 +114,10 @@ class JobDetailViewModel(
             uiState = uiState.copy(isUpdating = true)
             val result = repository.completeJob(jobId)
             uiState = if (result.isSuccess) {
-                AppSnackbarManager.showSuccess("Job completed")
+                AppSnackbarManager.showSuccess(JOB_COMPLETED)
                 uiState.copy(isUpdating = false, updateSuccess = true)
             } else {
-                AppSnackbarManager.showError("Failed to complete job")
+                AppSnackbarManager.showError(NETWORK_ERROR)
                 uiState.copy(isUpdating = false, error = result.exceptionOrNull()?.message ?: "Failed to complete job")
             }
         }

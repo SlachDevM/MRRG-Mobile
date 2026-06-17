@@ -10,6 +10,8 @@ import com.slachdevm.mrrgmobile.data.repository.JobRepository
 import com.slachdevm.mrrgmobile.domain.model.Job
 import com.slachdevm.mrrgmobile.domain.model.UserRole
 import com.slachdevm.mrrgmobile.ui.components.snackbar.AppSnackbarManager
+import com.slachdevm.mrrgmobile.ui.components.snackbar.SnackbarMessages.JOBS_UPDATED
+import com.slachdevm.mrrgmobile.ui.components.snackbar.SnackbarMessages.NETWORK_ERROR
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -45,7 +47,7 @@ class JobListViewModel(
         loadJobs()
     }
 
-    fun loadJobs() {
+    fun loadJobs(onSuccess: (() -> Unit)? = null) {
         viewModelScope.launch {
             uiState = uiState.copy(isLoading = true, error = null)
             
@@ -62,11 +64,22 @@ class JobListViewModel(
                 val grouped = jobs.filter { it.jobDate != null }.groupBy {
                     Instant.ofEpochMilli(it.jobDate!!).atZone(ZoneId.systemDefault()).toLocalDate()
                 }
-                AppSnackbarManager.showInfo("Jobs loaded successfully")
+                onSuccess?.invoke()
                 uiState.copy(jobsByDate = grouped, isLoading = false)
             } else {
-                AppSnackbarManager.showError("Unable to load job")
+                AppSnackbarManager.showError(NETWORK_ERROR)
                 uiState.copy(isLoading = false, error = result.exceptionOrNull()?.message ?: "Failed to load jobs")
+            }
+        }
+    }
+
+    fun refreshJobs() {
+        viewModelScope.launch {
+
+            loadJobs {
+                AppSnackbarManager.showInfo(
+                    JOBS_UPDATED
+                )
             }
         }
     }

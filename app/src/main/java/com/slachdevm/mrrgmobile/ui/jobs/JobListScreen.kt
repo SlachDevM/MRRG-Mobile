@@ -101,7 +101,7 @@ fun JobListScreen(
 
             SwipeRefresh(
                 state = swipeRefreshState,
-                onRefresh = { viewModel.loadJobs() },
+                onRefresh = { viewModel.refreshJobs() },
                 modifier = Modifier.fillMaxSize()
             ) {
                 if (state.isLoading && state.jobsByDate.isEmpty()) {
