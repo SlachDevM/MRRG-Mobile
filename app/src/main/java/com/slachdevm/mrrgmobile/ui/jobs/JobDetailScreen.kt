@@ -34,9 +34,11 @@ import java.io.File
 import android.content.Intent
 import androidx.compose.ui.window.Dialog
 import androidx.compose.foundation.clickable
+import com.slachdevm.mrrgmobile.domain.model.JobStatus
 import com.slachdevm.mrrgmobile.ui.components.StatusChip
 import com.slachdevm.mrrgmobile.ui.components.toJobTypeLabel
 import com.slachdevm.mrrgmobile.ui.components.toPriorityLabel
+import androidx.compose.material.icons.filled.Close
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -230,7 +232,8 @@ fun JobDetailScreen(
                     onAddPhoto = {
                         selectedPhotoType = "before"
                         showPhotoSourceDialog = true
-                    }
+                    },
+                    onDeletePhoto = { viewModel.removePhoto(it, isBefore = true) }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -241,7 +244,8 @@ fun JobDetailScreen(
                     onAddPhoto = {
                         selectedPhotoType = "after"
                         showPhotoSourceDialog = true
-                    }
+                    },
+                    onDeletePhoto = { viewModel.removePhoto(it, isBefore = false) }
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -262,20 +266,31 @@ fun JobDetailScreen(
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
+                if (job.status == JobStatus.IN_PROGRESS ||
+                    job.status == JobStatus.READY_FOR_CONFIRMATION) {
 
-                Button(
-                    onClick = { viewModel.completeJob() },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = MaterialTheme.colorScheme.onPrimaryContainer),
-                    enabled = !state.isUpdating
-                ) {
-                    Icon(Icons.Default.CheckCircle, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("VALIDATE / COMPLETE")
-                }
+                        val completeEnabled =
+                            job.status != JobStatus.READY_FOR_CONFIRMATION &&
+                                    !state.isUpdating
+                    Button(
+                        onClick = { viewModel.completeJob() },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = MaterialTheme.colorScheme.onPrimaryContainer),
+                        enabled = completeEnabled
+                    ) {
+                        Icon(Icons.Default.CheckCircle, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            if (job.status == JobStatus.READY_FOR_CONFIRMATION)
+                                "Waiting for confirmation"
+                            else
+                                "Complete"
+                        )
+                    }
 
-                if (state.error != null) {
-                    Text(text = state.error, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp))
+                    if (state.error != null) {
+                        Text(text = state.error, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp))
+                    }
                 }
             }
         }
@@ -335,7 +350,8 @@ fun DetailItem(label: String, value: String) {
 fun PhotoSection(
     title: String,
     photos: List<String>,
-    onAddPhoto: () -> Unit
+    onAddPhoto: () -> Unit,
+    onDeletePhoto: (String) -> Unit
 ) {
     var selectedPhoto by remember { mutableStateOf<String?>(null) }
     
@@ -356,28 +372,26 @@ fun PhotoSection(
         } else {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(photos) { photoUrl ->
-                    Card(
-                        modifier = Modifier
-                            .size(120.dp)
-                            .clickable { selectedPhoto = photoUrl }
+                    Box(
+                        modifier = Modifier.size(120.dp)
                     ) {
-                        val cleanBase64 = photoUrl
-                            .substringAfter("base64,", photoUrl)
-                            .replace("\n", "")
-                            .replace("\r", "")
-                            .trim()
+                        Card(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clickable { selectedPhoto = photoUrl }
+                        ) {
+                            val cleanBase64 = photoUrl
+                                .substringAfter("base64,", photoUrl)
+                                .replace("\n", "")
+                                .replace("\r", "")
+                                .trim()
 
-                        val imageBytes = try {
-                            Base64.decode(cleanBase64, Base64.DEFAULT)
-                        } catch (e: Exception) {
-                            null
-                        }
+                            val imageBytes = try {
+                                Base64.decode(cleanBase64, Base64.DEFAULT)
+                            } catch (e: Exception) {
+                                null
+                            }
 
-                        val bitmap = imageBytes?.let {
-                            BitmapFactory.decodeByteArray(it, 0, it.size)
-                        }
-
-                        if (bitmap != null) {
                             val bitmap = imageBytes?.let {
                                 BitmapFactory.decodeByteArray(it, 0, it.size)
                             }
@@ -396,8 +410,19 @@ fun PhotoSection(
                             } else {
                                 Text("Image unavailable")
                             }
-                        } else {
-                            Text("Image unavailable")
+                        }
+
+                        IconButton(
+                            onClick = { onDeletePhoto(photoUrl) },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Delete photo",
+                                tint = MaterialTheme.colorScheme.error
+                            )
                         }
                     }
                 }

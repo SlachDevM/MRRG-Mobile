@@ -14,6 +14,7 @@ import com.slachdevm.mrrgmobile.ui.components.snackbar.SnackbarMessages.JOB_COMP
 import com.slachdevm.mrrgmobile.ui.components.snackbar.SnackbarMessages.JOB_UPDATE_FAILED
 import com.slachdevm.mrrgmobile.ui.components.snackbar.SnackbarMessages.NETWORK_ERROR
 import com.slachdevm.mrrgmobile.ui.components.snackbar.SnackbarMessages.NOTES_SAVED
+import com.slachdevm.mrrgmobile.ui.components.snackbar.SnackbarMessages.PHOTO_DELETED_SUCCESS
 import kotlinx.coroutines.launch
 
 data class JobDetailUiState(
@@ -125,5 +126,19 @@ class JobDetailViewModel(
 
     fun clearUpdateSuccess() {
         uiState = uiState.copy(updateSuccess = false)
+    }
+
+    fun removePhoto(url: String, isBefore: Boolean) {
+        val currentJob = uiState.job ?: return
+
+        val updatedJob = currentJob.copy(
+            beforePhotos = if (isBefore) currentJob.beforePhotos - url else currentJob.beforePhotos,
+            afterPhotos = if (!isBefore) currentJob.afterPhotos - url else currentJob.afterPhotos
+        )
+
+        updateJob(
+            updatedJob = updatedJob,
+            successMessage = PHOTO_DELETED_SUCCESS
+        )
     }
 }

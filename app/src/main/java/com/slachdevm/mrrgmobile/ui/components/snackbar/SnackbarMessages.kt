@@ -15,4 +15,6 @@ object SnackbarMessages {
     const val NETWORK_ERROR = "Network error"
 
     const val JOB_UPDATE_FAILED = "Unable to update job"
+
+    const val PHOTO_DELETED_SUCCESS = "Photo successfully deleted"
 }

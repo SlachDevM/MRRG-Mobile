@@ -25,6 +25,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Person
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,6 +36,13 @@ fun JobListScreen(
     onLogout: () -> Unit
 ) {
     val state = viewModel.uiState
+    val hour = java.time.LocalTime.now().hour
+
+    val greeting = when (hour) {
+        in 5..11 -> "Good morning"
+        in 12..17 -> "Good afternoon"
+        else -> "Good evening"
+    }
 
     Scaffold(
         topBar = {
@@ -41,13 +50,23 @@ fun JobListScreen(
                 title = {
                     Column {
                         Text(
-                            text = "Dashboard",
-                            style = MaterialTheme.typography.titleMedium
+                            text = "👋 $greeting",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.outline
                         )
+
                         Text(
-                            text = "${state.userName ?: "Unknown"} (${state.userRole?.toLabel() ?: "No Role"})",
-                            style = MaterialTheme.typography.bodySmall
+                            text = state.userName ?: "Worker",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
                         )
+
+                        Text(
+                            text = state.userRole?.displayName ?: "",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
                 },
                 actions = {
@@ -122,22 +141,65 @@ fun JobListScreen(
                         )
                     }
                 } else {
+                    val hasJobs = state.jobsByDate.values.any { it.isNotEmpty() }
                     val daysToShow = if (state.viewMode == ViewMode.DAY_3) 3 else 7
+                    if (!state.isLoading && !hasJobs) {
 
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items((0 until daysToShow).toList()) { index ->
-                            val date = state.selectedDate.plusDays(index.toLong())
-                            val jobsForDate = state.jobsByDate[date] ?: emptyList()
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.CalendarMonth,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(72.dp),
+                                    tint = MaterialTheme.colorScheme.outline
+                                )
 
-                            DaySection(
-                                date = date,
-                                jobs = jobsForDate,
-                                currentUserName = state.userName ?: "",
-                                currentUserRole = state.userRole,
-                                onJobClick = onJobClick
-                            )
+                                Spacer(Modifier.height(16.dp))
+
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                    )
+                                ) {
+                                    Text(
+                                        text = "No jobs planned for this day",
+                                        modifier = Modifier.padding(16.dp),
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+
+                                Text(
+                                    "No work planned today. Enjoy your day!",
+                                    color = MaterialTheme.colorScheme.outline
+                                )
+                            }
+                        }
+
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp)
+                        ) {
+                            items((0 until daysToShow).toList()) { index ->
+                                val date = state.selectedDate.plusDays(index.toLong())
+                                val jobsForDate = state.jobsByDate[date] ?: emptyList()
+
+                                DaySection(
+                                    date = date,
+                                    jobs = jobsForDate,
+                                    currentUserName = state.userName ?: "",
+                                    currentUserRole = state.userRole,
+                                    onJobClick = onJobClick
+                                )
+                            }
                         }
                     }
                 }
@@ -155,25 +217,58 @@ fun DaySection(
     onJobClick: (Long) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.fillMaxWidth()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
             Text(
                 text = date.format(DateTimeFormatter.ofPattern("EEEE, MMM dd")),
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(top = 6.dp),
+                color = MaterialTheme.colorScheme.outlineVariant
             )
         }
 
         if (jobs.isEmpty()) {
-            Text(
-                text = "No jobs scheduled",
-                modifier = Modifier.padding(16.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline
-            )
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "☕",
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column {
+                        Text(
+                            text = "No jobs scheduled",
+                            style = MaterialTheme.typography.titleSmall
+                        )
+
+                        Text(
+                            text = "No work planned today. Enjoy your day!",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                    }
+                }
+            }
         } else {
             jobs.forEach { job ->
                 val isAssigned = job.assignedWorkers?.contains(currentUserName, ignoreCase = true) == true
@@ -191,7 +286,7 @@ fun DaySection(
 
 @Composable
 fun JobItem(
-    job: Job, 
+    job: Job,
     canEdit: Boolean,
     onClick: () -> Unit
 ) {
@@ -201,9 +296,13 @@ fun JobItem(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         onClick = onClick,
         enabled = canEdit,
-        colors = if (canEdit) CardDefaults.cardColors() else CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
-        )
+        colors = if (canEdit) {
+            CardDefaults.cardColors()
+        } else {
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
+            )
+        }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -214,9 +313,13 @@ fun JobItem(
                 Text(
                     text = job.jobTypes.toJobTypeLabel(),
                     style = MaterialTheme.typography.labelMedium,
-                    color = if (canEdit) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                    color = if (canEdit) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.outline
+                    }
                 )
-                
+
                 if (!canEdit) {
                     Icon(
                         imageVector = Icons.Default.Lock,
@@ -228,11 +331,17 @@ fun JobItem(
                     Text(
                         text = job.status.toLabel(),
                         style = MaterialTheme.typography.labelSmall,
-                        color = if (job.priorityLevel >= 3) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
+                        color = if (job.priorityLevel >= 3) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.secondary
+                        }
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(4.dp))
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -241,9 +350,17 @@ fun JobItem(
                 Text(
                     text = job.clientName,
                     style = MaterialTheme.typography.titleLarge,
-                    color = if (canEdit) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    color = if (canEdit) {
+                        MaterialTheme.colorScheme.onSurface
+                    } else {
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    },
+                    modifier = Modifier.weight(1f)
                 )
+
                 if (canEdit && job.priorityLevel >= 3) {
+                    Spacer(modifier = Modifier.width(8.dp))
+
                     Badge(
                         containerColor = MaterialTheme.colorScheme.errorContainer,
                         contentColor = MaterialTheme.colorScheme.onErrorContainer
@@ -255,20 +372,117 @@ fun JobItem(
                     }
                 }
             }
-            Text(
-                text = job.clientAddress, 
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (canEdit) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-            )
-            
-            if (!job.assignedWorkers.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(8.dp))
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colorScheme.outline
+                )
+
+                Spacer(modifier = Modifier.width(4.dp))
+
                 Text(
-                    text = "Workers: ${job.assignedWorkers}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (canEdit) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.outline
+                    text = job.clientAddress,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (canEdit) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    }
                 )
             }
+
+            if (!job.assignedWorkers.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.outline
+                    )
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Text(
+                        text = job.assignedWorkers ?: "",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (canEdit) {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            MaterialTheme.colorScheme.outline
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun GreetingHeader(
+    userName: String?,
+    todayJobsCount: Int
+) {
+    val today = LocalDate.now()
+    val hour = java.time.LocalTime.now().hour
+
+    val greeting = when (hour) {
+        in 5..11 -> "Good morning"
+        in 12..17 -> "Good afternoon"
+        else -> "Good evening"
+    }
+
+    val formattedDate = today.format(
+        DateTimeFormatter.ofPattern("EEEE, d MMMM")
+    )
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(
+                text = "👋 $greeting",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = userName ?: "Worker",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = formattedDate,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+            )
+
+            Text(
+                text = "$todayJobsCount job${if (todayJobsCount > 1) "s" else ""} today",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+            )
         }
     }
 }
