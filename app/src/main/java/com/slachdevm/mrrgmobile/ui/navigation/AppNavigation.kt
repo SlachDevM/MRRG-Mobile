@@ -1,10 +1,14 @@
 package com.slachdevm.mrrgmobile.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -90,9 +94,24 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                     }
                 }
             )
-            LaunchedEffect(Unit) {
-                notificationViewModel.loadUnreadCount()
+
+            val lifecycleOwner = LocalLifecycleOwner.current
+
+            DisposableEffect(lifecycleOwner) {
+                val observer = LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_RESUME) {
+                        jobListViewModel.loadJobs()
+                        notificationViewModel.loadUnreadCount()
+                    }
+                }
+
+                lifecycleOwner.lifecycle.addObserver(observer)
+
+                onDispose {
+                    lifecycleOwner.lifecycle.removeObserver(observer)
+                }
             }
+
             JobListScreen(
                 viewModel = jobListViewModel,
                 notificationUnreadCount = notificationViewModel.uiState.unreadCount,
