@@ -84,7 +84,7 @@ class JobDetailViewModel(
                     uiState = uiState.copy(
                         job = result.getOrNull(),
                         isUpdating = false,
-                        updateSuccess = true
+                        updateSuccess = false
                     )
 
                     successMessage?.let {

@@ -74,13 +74,10 @@ class JobListViewModel(
     }
 
     fun refreshJobs() {
-        viewModelScope.launch {
-
-            loadJobs {
-                AppSnackbarManager.showInfo(
-                    JOBS_UPDATED
-                )
-            }
+        loadJobs {
+            AppSnackbarManager.showInfo(
+                JOBS_UPDATED
+            )
         }
     }
 

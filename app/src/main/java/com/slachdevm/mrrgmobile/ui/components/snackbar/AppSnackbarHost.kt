@@ -7,15 +7,22 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun AppSnackbarHost(
     snackbarHostState: SnackbarHostState
 ) {
+    var currentType by remember { mutableStateOf<SnackbarType?>(null) }
+
     LaunchedEffect(Unit) {
-        AppSnackbarManager.messages.collectLatest { snackbarMessage ->
+        AppSnackbarManager.messages.collect { snackbarMessage ->
+            currentType = snackbarMessage.type
+
             snackbarHostState.showSnackbar(
                 message = snackbarMessage.message
             )
@@ -25,9 +32,7 @@ fun AppSnackbarHost(
     SnackbarHost(
         hostState = snackbarHostState
     ) { snackbarData ->
-        val messageType = AppSnackbarManager.lastMessageType
-
-        val backgroundColor = when (messageType) {
+        val backgroundColor = when (currentType) {
             SnackbarType.SUCCESS -> Color(0xFF2E7D32)
             SnackbarType.ERROR -> MaterialTheme.colorScheme.error
             SnackbarType.INFO -> MaterialTheme.colorScheme.primary
