@@ -57,7 +57,7 @@ class JobRepository(private val jobApi: JobApi) {
         }
     }
 
-    suspend fun updateJob(id: Long?, job: Job): Result<Job> {
+    suspend fun updateJob(id: Long, job: Job): Result<Job> {
         return try {
             val response = jobApi.updateJob(id, job)
             if (response.isSuccessful && response.body() != null) {

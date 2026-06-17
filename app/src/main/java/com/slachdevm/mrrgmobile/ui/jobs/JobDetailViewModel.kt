@@ -78,7 +78,7 @@ class JobDetailViewModel(
             uiState = uiState.copy(isUpdating = true, error = null)
 
             try {
-                val result = repository.updateJob(updatedJob.id, updatedJob)
+                val result = repository.updateJob(jobId, updatedJob)
 
                 if (result.isSuccess) {
                     uiState = uiState.copy(

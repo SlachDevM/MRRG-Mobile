@@ -9,40 +9,21 @@ import kotlinx.coroutines.launch
 
 object AppSnackbarManager {
 
-    private val _messages = MutableSharedFlow<SnackbarMessage>()
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val _messages = MutableSharedFlow<SnackbarMessage>(
+        extraBufferCapacity = 1
+    )
+
     val messages = _messages.asSharedFlow()
 
-    var lastMessageType: SnackbarType? = null
-        private set
-
     fun showSuccess(message: String) {
-        lastMessageType = SnackbarType.SUCCESS
-
-        scope.launch {
-            _messages.emit(
-                SnackbarMessage(message, SnackbarType.SUCCESS)
-            )
-        }
+        _messages.tryEmit(SnackbarMessage(message, SnackbarType.SUCCESS))
     }
 
     fun showError(message: String) {
-        lastMessageType = SnackbarType.ERROR
-
-        scope.launch {
-            _messages.emit(
-                SnackbarMessage(message, SnackbarType.ERROR)
-            )
-        }
+        _messages.tryEmit(SnackbarMessage(message, SnackbarType.ERROR))
     }
 
     fun showInfo(message: String) {
-        lastMessageType = SnackbarType.INFO
-
-        scope.launch {
-            _messages.emit(
-                SnackbarMessage(message, SnackbarType.INFO)
-            )
-        }
+        _messages.tryEmit(SnackbarMessage(message, SnackbarType.INFO))
     }
 }
