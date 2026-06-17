@@ -10,6 +10,7 @@ object RetrofitClient {
     const val BASE_URL = "http://10.0.2.2:4000"
     const val AUTHORIZATION_HEADER = "Authorization"
     const val BEARER_PREFIX = "Bearer"
+    private const val ENABLE_NETWORK_LOGS = true
 
     private var authToken: String? = null
 
@@ -17,8 +18,12 @@ object RetrofitClient {
         authToken = token
     }
 
-    private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
+    val loggingInterceptor = HttpLoggingInterceptor().apply {
+        level = if (ENABLE_NETWORK_LOGS) {
+            HttpLoggingInterceptor.Level.BODY
+        } else {
+            HttpLoggingInterceptor.Level.NONE
+        }
     }
 
     private val authInterceptor = Interceptor { chain ->
