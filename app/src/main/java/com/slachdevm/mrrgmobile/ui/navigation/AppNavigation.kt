@@ -1,6 +1,7 @@
 package com.slachdevm.mrrgmobile.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -16,17 +17,22 @@ import com.slachdevm.mrrgmobile.data.SessionManager
 import com.slachdevm.mrrgmobile.data.api.RetrofitClient
 import com.slachdevm.mrrgmobile.data.repository.AuthRepository
 import com.slachdevm.mrrgmobile.data.repository.JobRepository
+import com.slachdevm.mrrgmobile.data.repository.NotificationRepository
 import com.slachdevm.mrrgmobile.ui.auth.LoginScreen
 import com.slachdevm.mrrgmobile.ui.auth.LoginViewModel
 import com.slachdevm.mrrgmobile.ui.jobs.JobDetailScreen
 import com.slachdevm.mrrgmobile.ui.jobs.JobDetailViewModel
 import com.slachdevm.mrrgmobile.ui.jobs.JobListScreen
 import com.slachdevm.mrrgmobile.ui.jobs.JobListViewModel
+import com.slachdevm.mrrgmobile.ui.notifications.NotificationScreen
+import com.slachdevm.mrrgmobile.ui.notifications.NotificationViewModel
 
 object Routes {
     const val LOGIN = "login"
     const val JOBS = "jobs"
     const val JOB_DETAIL = "job_detail/{jobId}"
+
+    const val NOTIFICATIONS = "notifications"
     
     fun jobDetail(jobId: Long) = "job_detail/$jobId"
 }
@@ -39,6 +45,12 @@ fun AppNavigation(modifier: Modifier = Modifier) {
     val sessionManager = remember { SessionManager(context) }
     val authRepository = remember { AuthRepository(RetrofitClient.authApi, sessionManager) }
     val jobRepository = remember { JobRepository(RetrofitClient.jobApi) }
+    val notificationRepository = remember {
+        NotificationRepository(RetrofitClient.notificationApi)
+    }
+    val notificationViewModel = remember {
+        NotificationViewModel(notificationRepository)
+    }
 
     val startDestination = if (authRepository.isLoggedIn()) Routes.JOBS else Routes.LOGIN
 
@@ -73,8 +85,15 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                     }
                 }
             )
+            LaunchedEffect(Unit) {
+                notificationViewModel.loadUnreadCount()
+            }
             JobListScreen(
                 viewModel = jobListViewModel,
+                notificationUnreadCount = notificationViewModel.uiState.unreadCount,
+                onNotificationsClick = {
+                    navController.navigate(Routes.NOTIFICATIONS)
+                },
                 onJobClick = { jobId ->
                     navController.navigate(Routes.jobDetail(jobId))
                 },
@@ -101,6 +120,21 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             JobDetailScreen(
                 viewModel = jobDetailViewModel,
                 onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Routes.NOTIFICATIONS) {
+            NotificationScreen(
+                viewModel = notificationViewModel,
+                onBack = {
+                    notificationViewModel.loadUnreadCount()
+                    navController.popBackStack()
+                },
+                onOpenJob = { jobId ->
+                    notificationViewModel.loadUnreadCount()
+                    navController.popBackStack()
+                    navController.navigate(Routes.jobDetail(jobId))
+                }
             )
         }
     }

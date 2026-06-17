@@ -28,11 +28,14 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Notifications
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobListScreen(
     viewModel: JobListViewModel,
+    notificationUnreadCount: Long,
+    onNotificationsClick: () -> Unit,
     onJobClick: (Long) -> Unit,
     onLogout: () -> Unit
 ) {
@@ -71,12 +74,34 @@ fun JobListScreen(
                     }
                 },
                 actions = {
+
+                    BadgedBox(
+                        badge = {
+                            if (notificationUnreadCount > 0) {
+                                Badge {
+                                    Text(notificationUnreadCount.toString())
+                                }
+                            }
+                        }
+                    ) {
+                        IconButton(onClick = onNotificationsClick) {
+                            Icon(
+                                imageVector = Icons.Default.Notifications,
+                                contentDescription = "Notifications"
+                            )
+                        }
+                    }
+
                     IconButton(onClick = { viewModel.toggleViewMode() }) {
                         Icon(
-                            imageVector = if (state.viewMode == ViewMode.DAY_3) Icons.Default.CalendarMonth else Icons.Default.CalendarViewDay,
+                            imageVector = if (state.viewMode == ViewMode.DAY_3)
+                                Icons.Default.CalendarMonth
+                            else
+                                Icons.Default.CalendarViewDay,
                             contentDescription = "Toggle View Mode"
                         )
                     }
+
                     IconButton(onClick = {
                         viewModel.logout()
                         onLogout()
