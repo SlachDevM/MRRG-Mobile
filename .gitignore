@@ -1,4 +1,3 @@
-*.iml
 # Gradle
 .gradle/
 build/
@@ -20,9 +19,6 @@ Thumbs.db
 
 # Kotlin
 *.kotlin_module
-
-# temporary screenshots
-captures/
 
 # Native build
 .externalNativeBuild/
