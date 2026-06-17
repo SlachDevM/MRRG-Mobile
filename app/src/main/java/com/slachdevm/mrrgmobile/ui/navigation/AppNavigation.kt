@@ -49,9 +49,13 @@ fun AppNavigation(modifier: Modifier = Modifier) {
     val notificationRepository = remember {
         NotificationRepository(RetrofitClient.notificationApi)
     }
-    val notificationViewModel = remember {
-        NotificationViewModel(notificationRepository)
-    }
+    val notificationViewModel: NotificationViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer {
+                NotificationViewModel(notificationRepository)
+            }
+        }
+    )
 
     val startDestination = if (authRepository.isLoggedIn()) Routes.JOBS else Routes.LOGIN
 
