@@ -26,6 +26,17 @@ import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.asImageBitmap
 import android.graphics.Bitmap
 import java.io.ByteArrayOutputStream
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import java.io.File
+import android.content.Intent
+import androidx.compose.ui.window.Dialog
+import androidx.compose.foundation.clickable
+import com.slachdevm.mrrgmobile.ui.components.toJobTypeLabel
+import com.slachdevm.mrrgmobile.ui.components.toLabel
+import com.slachdevm.mrrgmobile.ui.components.toPriorityLabel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +49,50 @@ fun JobDetailScreen(
     var notesText by remember { mutableStateOf("") }
     val context = LocalContext.current
     var selectedPhotoType by remember { mutableStateOf<String?>(null) }
+
+    var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
+    var showPhotoSourceDialog by remember { mutableStateOf(false) }
+
+    fun createImageUri(): Uri {
+        val imageFile = File.createTempFile(
+            "mrrg_photo_",
+            ".jpg",
+            context.cacheDir
+        )
+
+        return FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.provider",
+            imageFile
+        )
+    }
+
+    fun openAddressInMaps(address: String) {
+        val encodedAddress = Uri.encode(address)
+        val uri = Uri.parse("geo:0,0?q=$encodedAddress")
+
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+            setPackage("com.google.android.apps.maps")
+        }
+
+        if (intent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(intent)
+        } else {
+            val browserIntent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://www.google.com/maps/search/?api=1&query=$encodedAddress")
+            )
+            context.startActivity(browserIntent)
+        }
+    }
+
+    fun callClient(phone: String) {
+        val intent = Intent(Intent.ACTION_DIAL).apply {
+            data = Uri.parse("tel:$phone")
+        }
+
+        context.startActivity(intent)
+    }
 
     fun uriToBase64(uri: Uri): String? {
         return try {
@@ -82,6 +137,33 @@ fun JobDetailScreen(
         }
     }
 
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            cameraImageUri?.let { uri ->
+                val base64 = uriToBase64(uri)
+
+                if (base64 != null) {
+                    viewModel.addPhoto(
+                        url = base64,
+                        isBefore = selectedPhotoType == "before"
+                    )
+                }
+            }
+        }
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            val uri = createImageUri()
+            cameraImageUri = uri
+            cameraLauncher.launch(uri)
+        }
+    }
+
     LaunchedEffect(state.job) {
         state.job?.notes?.let { notesText = it }
     }
@@ -120,12 +202,22 @@ fun JobDetailScreen(
             ) {
                 Text(text = job.clientName, style = MaterialTheme.typography.headlineMedium)
                 Text(text = job.clientAddress, style = MaterialTheme.typography.bodyLarge)
+                TextButton(
+                    onClick = { openAddressInMaps(job.clientAddress) }
+                ) {
+                    Text("Open in Maps")
+                }
                 Text(text = job.clientPhone, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
-
+                TextButton(
+                    onClick = { callClient(job.clientPhone) }
+                ) {
+                    Text("Call client")
+                }
                 Spacer(modifier = Modifier.height(16.dp))
 
-                DetailItem(label = "Type", value = job.jobTypes)
-                DetailItem(label = "Status", value = job.status.name)
+                DetailItem(label = "Type", value = job.jobTypes.toJobTypeLabel())
+                DetailItem(label = "Status", value = job.status.toLabel())
+                DetailItem(label = "Priority", value = job.priorityLevel.toPriorityLabel())
                 DetailItem(label = "Details", value = job.details ?: "No extra details")
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -135,7 +227,7 @@ fun JobDetailScreen(
                     photos = job.beforePhotos,
                     onAddPhoto = {
                         selectedPhotoType = "before"
-                        imagePickerLauncher.launch("image/*")
+                        showPhotoSourceDialog = true
                     }
                 )
 
@@ -146,7 +238,7 @@ fun JobDetailScreen(
                     photos = job.afterPhotos,
                     onAddPhoto = {
                         selectedPhotoType = "after"
-                        imagePickerLauncher.launch("image/*")
+                        showPhotoSourceDialog = true
                     }
                 )
 
@@ -185,6 +277,47 @@ fun JobDetailScreen(
                 }
             }
         }
+
+        if (showPhotoSourceDialog) {
+            AlertDialog(
+                onDismissRequest = { showPhotoSourceDialog = false },
+                title = { Text("Add photo") },
+                text = { Text("Choose a photo source") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showPhotoSourceDialog = false
+
+                            val uri = createImageUri()
+                            cameraImageUri = uri
+
+                            val hasPermission = ContextCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.CAMERA
+                            ) == PackageManager.PERMISSION_GRANTED
+
+                            if (hasPermission) {
+                                cameraLauncher.launch(uri)
+                            } else {
+                                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                            }
+                        }
+                    ) {
+                        Text("Camera")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showPhotoSourceDialog = false
+                            imagePickerLauncher.launch("image/*")
+                        }
+                    ) {
+                        Text("Gallery")
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -202,6 +335,8 @@ fun PhotoSection(
     photos: List<String>,
     onAddPhoto: () -> Unit
 ) {
+    var selectedPhoto by remember { mutableStateOf<String?>(null) }
+    
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -219,7 +354,11 @@ fun PhotoSection(
         } else {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(photos) { photoUrl ->
-                    Card(modifier = Modifier.size(120.dp)) {
+                    Card(
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clickable { selectedPhoto = photoUrl }
+                    ) {
                         val cleanBase64 = photoUrl
                             .substringAfter("base64,", photoUrl)
                             .replace("\n", "")
@@ -258,6 +397,59 @@ fun PhotoSection(
                         } else {
                             Text("Image unavailable")
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    selectedPhoto?.let { photoUrl ->
+        Dialog(
+            onDismissRequest = { selectedPhoto = null }
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(500.dp)
+            ) {
+                val cleanBase64 = photoUrl
+                    .substringAfter("base64,", photoUrl)
+                    .replace("\n", "")
+                    .replace("\r", "")
+                    .trim()
+
+                val imageBytes = try {
+                    Base64.decode(cleanBase64, Base64.DEFAULT)
+                } catch (e: Exception) {
+                    null
+                }
+
+                val bitmap = imageBytes?.let {
+                    BitmapFactory.decodeByteArray(it, 0, it.size)
+                }
+
+                val displayBitmap = bitmap?.let {
+                    Bitmap.createScaledBitmap(
+                        it,
+                        900,
+                        (900f / it.width * it.height).toInt(),
+                        true
+                    )
+                }
+
+                if (displayBitmap != null) {
+                    Image(
+                        bitmap = displayBitmap.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Image unavailable")
                     }
                 }
             }

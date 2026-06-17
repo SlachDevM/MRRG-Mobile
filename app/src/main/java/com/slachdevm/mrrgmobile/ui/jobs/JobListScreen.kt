@@ -18,6 +18,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.slachdevm.mrrgmobile.domain.model.Job
 import com.slachdevm.mrrgmobile.domain.model.UserRole
+import com.slachdevm.mrrgmobile.ui.components.toJobTypeLabel
+import com.slachdevm.mrrgmobile.ui.components.toLabel
+import com.slachdevm.mrrgmobile.ui.components.toPriorityLabel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -40,7 +43,7 @@ fun JobListScreen(
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            text = "${state.userName ?: "Unknown"} (${state.userRole ?: "No Role"})",
+                            text = "${state.userName ?: "Unknown"} (${state.userRole?.toLabel() ?: "No Role"})",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -186,7 +189,7 @@ fun JobItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = job.jobTypes,
+                    text = job.jobTypes.toJobTypeLabel(),
                     style = MaterialTheme.typography.labelMedium,
                     color = if (canEdit) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                 )
@@ -200,18 +203,35 @@ fun JobItem(
                     )
                 } else {
                     Text(
-                        text = job.status.name,
+                        text = job.status.toLabel(),
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = if (job.priorityLevel >= 3) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
                     )
                 }
             }
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = job.clientName, 
-                style = MaterialTheme.typography.titleLarge,
-                color = if (canEdit) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = job.clientName,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = if (canEdit) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+                if (canEdit && job.priorityLevel >= 3) {
+                    Badge(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer
+                    ) {
+                        Text(
+                            text = job.priorityLevel.toPriorityLabel(),
+                            modifier = Modifier.padding(horizontal = 4.dp)
+                        )
+                    }
+                }
+            }
             Text(
                 text = job.clientAddress, 
                 style = MaterialTheme.typography.bodyMedium,
