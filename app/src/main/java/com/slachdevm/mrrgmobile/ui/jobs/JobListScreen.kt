@@ -9,6 +9,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CalendarViewDay
+import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -144,45 +145,46 @@ fun JobListScreen(
                     val hasJobs = state.jobsByDate.values.any { it.isNotEmpty() }
                     val daysToShow = if (state.viewMode == ViewMode.DAY_3) 3 else 7
                     if (!state.isLoading && !hasJobs) {
-
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                )
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.CalendarMonth,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(72.dp),
-                                    tint = MaterialTheme.colorScheme.outline
-                                )
-
-                                Spacer(Modifier.height(16.dp))
-
-                                Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                                    )
+                                Row(
+                                    modifier = Modifier.padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(
-                                        text = "No jobs planned for this day",
-                                        modifier = Modifier.padding(16.dp),
-                                        style = MaterialTheme.typography.bodyMedium
+                                    Icon(
+                                        imageVector = Icons.Default.CalendarMonth,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(32.dp),
+                                        tint = MaterialTheme.colorScheme.outline
                                     )
-                                }
 
-                                Text(
-                                    "No work planned today. Enjoy your day!",
-                                    color = MaterialTheme.colorScheme.outline
-                                )
+                                    Spacer(modifier = Modifier.width(12.dp))
+
+                                    Column {
+                                        Text(
+                                            text = "No jobs scheduled",
+                                            style = MaterialTheme.typography.titleSmall
+                                        )
+
+                                        Text(
+                                            text = "No work planned for this period.",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.outline
+                                        )
+                                    }
+                                }
                             }
                         }
-
                     } else {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
@@ -248,9 +250,9 @@ fun DaySection(
                     modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "☕",
-                        style = MaterialTheme.typography.headlineSmall
+                    Icon(
+                        imageVector = Icons.Default.EventAvailable,
+                        contentDescription = null
                     )
 
                     Spacer(modifier = Modifier.width(12.dp))
