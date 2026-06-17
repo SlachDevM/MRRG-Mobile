@@ -23,6 +23,8 @@ import com.slachdevm.mrrgmobile.ui.components.toLabel
 import com.slachdevm.mrrgmobile.ui.components.toPriorityLabel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,29 +95,50 @@ fun JobListScreen(
                 }
             }
 
-            if (state.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            } else if (state.error != null) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = state.error, color = MaterialTheme.colorScheme.error)
-                }
-            } else {
-                val daysToShow = if (state.viewMode == ViewMode.DAY_3) 3 else 7
-                
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items((0 until daysToShow).toList()) { index ->
-                        val date = state.selectedDate.plusDays(index.toLong())
-                        val jobsForDate = state.jobsByDate[date] ?: emptyList()
-                        
-                        DaySection(
-                            date = date,
-                            jobs = jobsForDate,
-                            currentUserName = state.userName ?: "",
-                            currentUserRole = state.userRole,
-                            onJobClick = onJobClick
+            val swipeRefreshState = rememberSwipeRefreshState(
+                isRefreshing = state.isLoading
+            )
+
+            SwipeRefresh(
+                state = swipeRefreshState,
+                onRefresh = { viewModel.loadJobs() },
+                modifier = Modifier.fillMaxSize()
+            ) {
+                if (state.isLoading && state.jobsByDate.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                } else if (state.error != null && state.jobsByDate.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = state.error,
+                            color = MaterialTheme.colorScheme.error
                         )
+                    }
+                } else {
+                    val daysToShow = if (state.viewMode == ViewMode.DAY_3) 3 else 7
+
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items((0 until daysToShow).toList()) { index ->
+                            val date = state.selectedDate.plusDays(index.toLong())
+                            val jobsForDate = state.jobsByDate[date] ?: emptyList()
+
+                            DaySection(
+                                date = date,
+                                jobs = jobsForDate,
+                                currentUserName = state.userName ?: "",
+                                currentUserRole = state.userRole,
+                                onJobClick = onJobClick
+                            )
+                        }
                     }
                 }
             }
