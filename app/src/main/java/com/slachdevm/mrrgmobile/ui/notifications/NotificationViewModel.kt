@@ -16,36 +16,14 @@ class NotificationViewModel(
         private set
 
     fun refresh() {
-        loadNotifications()
-        loadUnreadCount()
-    }
-
-    private fun loadNotifications() {
         viewModelScope.launch {
-            uiState = uiState.copy(isLoading = true)
-
-            val result = repository.getNotifications()
-
-            uiState = if (result.isSuccess) {
-                uiState.copy(
-                    notifications = result.getOrDefault(emptyList()),
-                    isLoading = false,
-                    error = null
-                )
-            } else {
-                uiState.copy(
-                    isLoading = false,
-                    error = result.exceptionOrNull()?.message
-                )
-            }
+            refreshState(showLoading = true)
         }
     }
 
     fun loadUnreadCount() {
         viewModelScope.launch {
-            repository.getUnreadCount().onSuccess {
-                uiState = uiState.copy(unreadCount = it)
-            }
+            refreshUnreadCount()
         }
     }
 
@@ -59,25 +37,51 @@ class NotificationViewModel(
             )
 
             repository.markAsRead(id)
-
-            loadUnreadCount()
-            loadNotifications()
+            refreshState(showLoading = false)
         }
     }
 
     fun markAllAsRead() {
         viewModelScope.launch {
             uiState = uiState.copy(
-                notifications = uiState.notifications.map {
-                    it.copy(read = true)
-                },
+                notifications = uiState.notifications.map { it.copy(read = true) },
                 unreadCount = 0
             )
 
             repository.markAllAsRead()
+            refreshState(showLoading = false)
+        }
+    }
 
-            loadUnreadCount()
-            loadNotifications()
+    private suspend fun refreshState(showLoading: Boolean) {
+        refreshNotifications(showLoading)
+        refreshUnreadCount()
+    }
+
+    private suspend fun refreshNotifications(showLoading: Boolean) {
+        if (showLoading) {
+            uiState = uiState.copy(isLoading = true)
+        }
+
+        val result = repository.getNotifications()
+
+        uiState = if (result.isSuccess) {
+            uiState.copy(
+                notifications = result.getOrDefault(emptyList()),
+                isLoading = false,
+                error = null
+            )
+        } else {
+            uiState.copy(
+                isLoading = false,
+                error = result.exceptionOrNull()?.message
+            )
+        }
+    }
+
+    private suspend fun refreshUnreadCount() {
+        repository.getUnreadCount().onSuccess { unreadCount ->
+            uiState = uiState.copy(unreadCount = unreadCount)
         }
     }
 }

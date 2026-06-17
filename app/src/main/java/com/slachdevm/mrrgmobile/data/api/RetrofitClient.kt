@@ -9,7 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object RetrofitClient {
     const val BASE_URL = "http://10.0.2.2:4000"
     const val AUTHORIZATION_HEADER = "Authorization"
-    const val BEARER_PREFIX = "Bearer"
+    const val BEARER_PREFIX = "Bearer "
     private const val ENABLE_NETWORK_LOGS = true
 
     private var authToken: String? = null
