@@ -20,7 +20,10 @@ import java.util.Locale
 import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,7 +33,12 @@ fun NotificationScreen(
     onOpenJob: (Long) -> Unit
 ) {
     val state = viewModel.uiState
-
+    LaunchedEffect(Unit) {
+        viewModel.refresh()
+    }
+    val swipeRefreshState = rememberSwipeRefreshState(
+        isRefreshing = state.isLoading
+    )
     Scaffold(
         topBar = {
             TopAppBar(
@@ -56,48 +64,54 @@ fun NotificationScreen(
             )
         }
     ) { padding ->
-        Box(
+        SwipeRefresh(
+            state = swipeRefreshState,
+            onRefresh = { viewModel.refresh() },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            when {
-                state.isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                when {
+                    state.isLoading -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
 
-                state.error != null -> {
-                    Text(
-                        text = state.error,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
+                    state.error != null -> {
+                        Text(
+                            text = state.error,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
 
-                state.notifications.isEmpty() -> {
-                    EmptyNotifications()
-                }
+                    state.notifications.isEmpty() -> {
+                        EmptyNotifications()
+                    }
 
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(vertical = 8.dp)
-                    ) {
-                        items(state.notifications) { notification ->
-                            NotificationItem(
-                                notification = notification,
-                                onClick = {
-                                    if (!notification.read) {
-                                        viewModel.markAsRead(notification.id)
+                    else -> {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(vertical = 8.dp)
+                        ) {
+                            items(state.notifications) { notification ->
+                                NotificationItem(
+                                    notification = notification,
+                                    onClick = {
+                                        if (!notification.read) {
+                                            viewModel.markAsRead(notification.id)
+                                        }
+
+                                        notification.jobId?.let { jobId ->
+                                            onOpenJob(jobId)
+                                        }
                                     }
-
-                                    notification.jobId?.let {
-                                        onOpenJob(it)
-                                    }
-                                }
-                            )
+                                )
+                            }
                         }
                     }
                 }
