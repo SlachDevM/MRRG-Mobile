@@ -15,10 +15,6 @@ class NotificationViewModel(
     var uiState by mutableStateOf(NotificationUiState())
         private set
 
-    init {
-        refresh()
-    }
-
     fun refresh() {
         loadNotifications()
         loadUnreadCount()

@@ -7,8 +7,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-
-    private const val BASE_URL = "http://10.0.2.2:4000"
+    const val BASE_URL = "http://10.0.2.2:4000"
+    const val AUTHORIZATION_HEADER = "Authorization"
+    const val BEARER_PREFIX = "Bearer"
 
     private var authToken: String? = null
 
@@ -25,7 +26,7 @@ object RetrofitClient {
         val requestBuilder = original.newBuilder()
 
         authToken?.let {
-            requestBuilder.addHeader("Authorization", "Bearer $it")
+            requestBuilder.addHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + it)
         }
 
         chain.proceed(requestBuilder.build())

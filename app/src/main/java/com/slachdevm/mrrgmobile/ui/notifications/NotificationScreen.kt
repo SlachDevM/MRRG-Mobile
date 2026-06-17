@@ -41,6 +41,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.slachdevm.mrrgmobile.domain.constants.JOB_ASSIGNED
+import com.slachdevm.mrrgmobile.domain.constants.JOB_CONFIRMED
+import com.slachdevm.mrrgmobile.domain.constants.JOB_READY_FOR_CONFIRMATION
 import com.slachdevm.mrrgmobile.domain.model.Notification
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -261,16 +264,16 @@ private fun formatNotificationDate(timestamp: Long): String {
 
 private fun notificationIcon(type: String): ImageVector =
     when (type) {
-        "JOB_ASSIGNED" -> Icons.Default.Assignment
-        "JOB_READY_FOR_CONFIRMATION" -> Icons.Default.Schedule
-        "JOB_CONFIRMED" -> Icons.Default.CheckCircle
+        JOB_ASSIGNED -> Icons.Default.Assignment
+        JOB_READY_FOR_CONFIRMATION -> Icons.Default.Schedule
+        JOB_CONFIRMED -> Icons.Default.CheckCircle
         else -> Icons.Default.Notifications
     }
 
 private fun notificationTitle(type: String): String =
     when (type) {
-        "JOB_ASSIGNED" -> "New job assigned"
-        "JOB_READY_FOR_CONFIRMATION" -> "Ready for confirmation"
-        "JOB_CONFIRMED" -> "Job confirmed"
+        JOB_ASSIGNED -> "New job assigned"
+        JOB_READY_FOR_CONFIRMATION -> "Ready for confirmation"
+        JOB_CONFIRMED -> "Job confirmed"
         else -> "Notification"
     }

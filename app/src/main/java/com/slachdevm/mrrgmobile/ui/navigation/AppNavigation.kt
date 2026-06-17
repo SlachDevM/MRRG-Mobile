@@ -30,9 +30,10 @@ import com.slachdevm.mrrgmobile.ui.notifications.NotificationViewModel
 object Routes {
     const val LOGIN = "login"
     const val JOBS = "jobs"
-    const val JOB_DETAIL = "job_detail/{jobId}"
 
     const val NOTIFICATIONS = "notifications"
+    const val JOB_ID_ARG = "jobId"
+    const val JOB_DETAIL = "job_detail/{$JOB_ID_ARG}"
 
     fun jobDetail(jobId: Long) = "job_detail/$jobId"
 }
@@ -107,9 +108,9 @@ fun AppNavigation(modifier: Modifier = Modifier) {
 
         composable(
             route = Routes.JOB_DETAIL,
-            arguments = listOf(navArgument("jobId") { type = NavType.LongType })
+            arguments = listOf(navArgument(Routes.JOB_ID_ARG ) { type = NavType.LongType })
         ) { backStackEntry ->
-            val jobId = backStackEntry.arguments?.getLong("jobId") ?: return@composable
+            val jobId = backStackEntry.arguments?.getLong(Routes.JOB_ID_ARG ) ?: return@composable
             val jobDetailViewModel: JobDetailViewModel = viewModel(
                 factory = viewModelFactory {
                     initializer {
