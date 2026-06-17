@@ -1,1 +1,33 @@
 *.iml
+# Gradle
+.gradle/
+build/
+**/build/
+
+# Local configuration
+local.properties
+
+# Android Studio
+.idea/
+*.iml
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Kotlin
+*.kotlin_module
+
+# temporary screenshots
+captures/
+
+# Native build
+.externalNativeBuild/
+.cxx/
+
+# Keystores
+*.jks
+*.keystore
