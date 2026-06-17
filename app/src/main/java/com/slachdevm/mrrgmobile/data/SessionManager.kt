@@ -5,7 +5,8 @@ import android.content.SharedPreferences
 import com.slachdevm.mrrgmobile.domain.model.UserRole
 
 class SessionManager(context: Context) {
-    private var prefs: SharedPreferences = context.getSharedPreferences("mrrg_prefs", Context.MODE_PRIVATE)
+    private var prefs: SharedPreferences =
+        context.getSharedPreferences("mrrg_prefs", Context.MODE_PRIVATE)
 
     companion object {
         private const val USER_TOKEN = "user_token"

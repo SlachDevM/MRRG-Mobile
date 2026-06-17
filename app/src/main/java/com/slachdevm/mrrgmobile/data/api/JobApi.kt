@@ -2,7 +2,13 @@ package com.slachdevm.mrrgmobile.data.api
 
 import com.slachdevm.mrrgmobile.domain.model.Job
 import retrofit2.Response
-import retrofit2.http.*
+import retrofit2.http.Body
+import retrofit2.http.DELETE
+import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface JobApi {
     @GET("/api/jobs")

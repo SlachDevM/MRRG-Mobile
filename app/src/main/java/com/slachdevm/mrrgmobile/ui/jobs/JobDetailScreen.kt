@@ -1,6 +1,27 @@
 package com.slachdevm.mrrgmobile.ui.jobs
 
-import androidx.compose.foundation.layout.*
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.util.Base64
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -9,36 +30,43 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import android.net.Uri
-import android.util.Base64
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import android.graphics.BitmapFactory
-import androidx.compose.foundation.Image
-import androidx.compose.ui.graphics.asImageBitmap
-import android.graphics.Bitmap
-import java.io.ByteArrayOutputStream
-import android.Manifest
-import android.content.pm.PackageManager
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import java.io.File
-import android.content.Intent
-import androidx.compose.ui.window.Dialog
-import androidx.compose.foundation.clickable
 import com.slachdevm.mrrgmobile.domain.model.JobStatus
 import com.slachdevm.mrrgmobile.ui.components.StatusChip
 import com.slachdevm.mrrgmobile.ui.components.toJobTypeLabel
 import com.slachdevm.mrrgmobile.ui.components.toPriorityLabel
-import androidx.compose.material.icons.filled.Close
+import java.io.ByteArrayOutputStream
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -211,7 +239,11 @@ fun JobDetailScreen(
                 ) {
                     Text("Start navigation")
                 }
-                Text(text = job.clientPhone, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+                Text(
+                    text = job.clientPhone,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
                 TextButton(
                     onClick = { callClient(job.clientPhone) }
                 ) {
@@ -250,16 +282,24 @@ fun JobDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Text(text = "Notes", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(
+                    text = "Notes",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
                 OutlinedTextField(
                     value = notesText,
                     onValueChange = { notesText = it },
-                    modifier = Modifier.fillMaxWidth().height(120.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp),
                     placeholder = { Text("Add notes here...") }
                 )
                 Button(
                     onClick = { viewModel.updateNotes(notesText) },
-                    modifier = Modifier.align(Alignment.End).padding(top = 8.dp),
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .padding(top = 8.dp),
                     enabled = !state.isUpdating
                 ) {
                     Text("Save Notes")
@@ -267,15 +307,19 @@ fun JobDetailScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
                 if (job.status == JobStatus.IN_PROGRESS ||
-                    job.status == JobStatus.READY_FOR_CONFIRMATION) {
+                    job.status == JobStatus.READY_FOR_CONFIRMATION
+                ) {
 
-                        val completeEnabled =
-                            job.status != JobStatus.READY_FOR_CONFIRMATION &&
-                                    !state.isUpdating
+                    val completeEnabled =
+                        job.status != JobStatus.READY_FOR_CONFIRMATION &&
+                                !state.isUpdating
                     Button(
                         onClick = { viewModel.completeJob() },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = MaterialTheme.colorScheme.onPrimaryContainer),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
                         enabled = completeEnabled
                     ) {
                         Icon(Icons.Default.CheckCircle, contentDescription = null)
@@ -289,7 +333,11 @@ fun JobDetailScreen(
                     }
 
                     if (state.error != null) {
-                        Text(text = state.error, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp))
+                        Text(
+                            text = state.error,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
                     }
                 }
             }
@@ -341,7 +389,11 @@ fun JobDetailScreen(
 @Composable
 fun DetailItem(label: String, value: String) {
     Column(modifier = Modifier.padding(vertical = 4.dp)) {
-        Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.outline
+        )
         Text(text = value, style = MaterialTheme.typography.bodyLarge)
     }
 }
@@ -354,21 +406,29 @@ fun PhotoSection(
     onDeletePhoto: (String) -> Unit
 ) {
     var selectedPhoto by remember { mutableStateOf<String?>(null) }
-    
+
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
             IconButton(onClick = onAddPhoto) {
                 Icon(Icons.Default.AddAPhoto, contentDescription = "Add Photo")
             }
         }
 
         if (photos.isEmpty()) {
-            Text(text = "No photos added", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+            Text(
+                text = "No photos added",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.outline
+            )
         } else {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(photos) { photoUrl ->

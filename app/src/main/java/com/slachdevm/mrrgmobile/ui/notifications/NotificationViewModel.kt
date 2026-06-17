@@ -1,12 +1,12 @@
 package com.slachdevm.mrrgmobile.ui.notifications
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slachdevm.mrrgmobile.data.repository.NotificationRepository
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 
 class NotificationViewModel(
     private val repository: NotificationRepository

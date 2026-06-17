@@ -44,7 +44,10 @@ class JobDetailViewModel(
             uiState = if (result.isSuccess) {
                 uiState.copy(job = result.getOrNull(), isLoading = false)
             } else {
-                uiState.copy(isLoading = false, error = result.exceptionOrNull()?.message ?: "Failed to load job")
+                uiState.copy(
+                    isLoading = false,
+                    error = result.exceptionOrNull()?.message ?: "Failed to load job"
+                )
             }
         }
     }
@@ -59,16 +62,18 @@ class JobDetailViewModel(
         val currentJob = uiState.job ?: return
         val updatedBefore = if (isBefore) currentJob.beforePhotos + url else currentJob.beforePhotos
         val updatedAfter = if (!isBefore) currentJob.afterPhotos + url else currentJob.afterPhotos
-        
+
         val updatedJob = currentJob.copy(
             beforePhotos = updatedBefore,
             afterPhotos = updatedAfter
         )
-        updateJob(updatedJob, successMessage = if (isBefore) {
-            BEFORE_PHOTO
-        } else {
-            AFTER_PHOTO
-        })
+        updateJob(
+            updatedJob, successMessage = if (isBefore) {
+                BEFORE_PHOTO
+            } else {
+                AFTER_PHOTO
+            }
+        )
     }
 
     private fun updateJob(
@@ -119,7 +124,10 @@ class JobDetailViewModel(
                 uiState.copy(isUpdating = false, updateSuccess = true)
             } else {
                 AppSnackbarManager.showError(NETWORK_ERROR)
-                uiState.copy(isUpdating = false, error = result.exceptionOrNull()?.message ?: "Failed to complete job")
+                uiState.copy(
+                    isUpdating = false,
+                    error = result.exceptionOrNull()?.message ?: "Failed to complete job"
+                )
             }
         }
     }

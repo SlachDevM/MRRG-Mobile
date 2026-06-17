@@ -5,7 +5,7 @@ import com.slachdevm.mrrgmobile.domain.model.UserRole
 
 fun String.toJobTypeLabel(): String {
     if (this.isBlank()) return "Unknown Type"
-    
+
     return this.split(",")
         .map { type ->
             when (type.trim().uppercase()) {

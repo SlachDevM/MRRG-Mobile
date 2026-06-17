@@ -33,7 +33,7 @@ object Routes {
     const val JOB_DETAIL = "job_detail/{jobId}"
 
     const val NOTIFICATIONS = "notifications"
-    
+
     fun jobDetail(jobId: Long) = "job_detail/$jobId"
 }
 
@@ -41,7 +41,7 @@ object Routes {
 fun AppNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val context = LocalContext.current
-    
+
     val sessionManager = remember { SessionManager(context) }
     val authRepository = remember { AuthRepository(RetrofitClient.authApi, sessionManager) }
     val jobRepository = remember { JobRepository(RetrofitClient.jobApi) }
