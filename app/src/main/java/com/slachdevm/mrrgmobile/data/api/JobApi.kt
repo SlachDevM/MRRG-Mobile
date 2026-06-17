@@ -27,7 +27,7 @@ interface JobApi {
     suspend fun createJob(@Body job: Job): Response<Job>
 
     @PUT("/api/jobs/{id}")
-    suspend fun updateJob(@Path("id") id: Long, @Body job: Job): Response<Job>
+    suspend fun updateJob(@Path("id") id: Long?, @Body job: Job): Response<Job>
 
     @PUT("/api/jobs/{id}/complete")
     suspend fun completeJob(@Path("id") id: Long): Response<Unit>

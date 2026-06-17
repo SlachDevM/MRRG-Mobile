@@ -6,5 +6,6 @@ enum class JobStatus(val displayName: String) {
     READY_FOR_CONFIRMATION("Ready for Confirmation"),
     DONE("Completed"),
     TO_BE_FIXED("To Be Fixed"),
-    ARCHIVED("Archived")
+    ARCHIVED("Archived"),
+    IN_PROGRESS("In Progress")
 }

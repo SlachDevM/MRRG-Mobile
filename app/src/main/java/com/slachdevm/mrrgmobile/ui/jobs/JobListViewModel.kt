@@ -9,6 +9,7 @@ import com.slachdevm.mrrgmobile.data.repository.AuthRepository
 import com.slachdevm.mrrgmobile.data.repository.JobRepository
 import com.slachdevm.mrrgmobile.domain.model.Job
 import com.slachdevm.mrrgmobile.domain.model.UserRole
+import com.slachdevm.mrrgmobile.ui.components.snackbar.AppSnackbarManager
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -61,8 +62,10 @@ class JobListViewModel(
                 val grouped = jobs.filter { it.jobDate != null }.groupBy {
                     Instant.ofEpochMilli(it.jobDate!!).atZone(ZoneId.systemDefault()).toLocalDate()
                 }
+                AppSnackbarManager.showInfo("Jobs loaded successfully")
                 uiState.copy(jobsByDate = grouped, isLoading = false)
             } else {
+                AppSnackbarManager.showError("Unable to load job")
                 uiState.copy(isLoading = false, error = result.exceptionOrNull()?.message ?: "Failed to load jobs")
             }
         }

@@ -2,7 +2,6 @@ package com.slachdevm.mrrgmobile.data.repository
 
 import com.slachdevm.mrrgmobile.data.api.JobApi
 import com.slachdevm.mrrgmobile.domain.model.Job
-import retrofit2.Response
 
 class JobRepository(private val jobApi: JobApi) {
 
@@ -58,7 +57,7 @@ class JobRepository(private val jobApi: JobApi) {
         }
     }
 
-    suspend fun updateJob(id: Long, job: Job): Result<Job> {
+    suspend fun updateJob(id: Long?, job: Job): Result<Job> {
         return try {
             val response = jobApi.updateJob(id, job)
             if (response.isSuccessful && response.body() != null) {

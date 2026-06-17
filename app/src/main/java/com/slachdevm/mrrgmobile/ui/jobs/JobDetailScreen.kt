@@ -34,8 +34,8 @@ import java.io.File
 import android.content.Intent
 import androidx.compose.ui.window.Dialog
 import androidx.compose.foundation.clickable
+import com.slachdevm.mrrgmobile.ui.components.StatusChip
 import com.slachdevm.mrrgmobile.ui.components.toJobTypeLabel
-import com.slachdevm.mrrgmobile.ui.components.toLabel
 import com.slachdevm.mrrgmobile.ui.components.toPriorityLabel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,20 +67,22 @@ fun JobDetailScreen(
         )
     }
 
-    fun openAddressInMaps(address: String) {
+    fun startNavigation(address: String) {
         val encodedAddress = Uri.encode(address)
-        val uri = Uri.parse("geo:0,0?q=$encodedAddress")
 
-        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+        val navigationIntent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("google.navigation:q=$encodedAddress")
+        ).apply {
             setPackage("com.google.android.apps.maps")
         }
 
-        if (intent.resolveActivity(context.packageManager) != null) {
-            context.startActivity(intent)
+        if (navigationIntent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(navigationIntent)
         } else {
             val browserIntent = Intent(
                 Intent.ACTION_VIEW,
-                Uri.parse("https://www.google.com/maps/search/?api=1&query=$encodedAddress")
+                Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$encodedAddress")
             )
             context.startActivity(browserIntent)
         }
@@ -203,9 +205,9 @@ fun JobDetailScreen(
                 Text(text = job.clientName, style = MaterialTheme.typography.headlineMedium)
                 Text(text = job.clientAddress, style = MaterialTheme.typography.bodyLarge)
                 TextButton(
-                    onClick = { openAddressInMaps(job.clientAddress) }
+                    onClick = { startNavigation(job.clientAddress) }
                 ) {
-                    Text("Open in Maps")
+                    Text("Start navigation")
                 }
                 Text(text = job.clientPhone, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
                 TextButton(
@@ -216,7 +218,7 @@ fun JobDetailScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 DetailItem(label = "Type", value = job.jobTypes.toJobTypeLabel())
-                DetailItem(label = "Status", value = job.status.toLabel())
+                StatusChip(status = job.status)
                 DetailItem(label = "Priority", value = job.priorityLevel.toPriorityLabel())
                 DetailItem(label = "Details", value = job.details ?: "No extra details")
 
