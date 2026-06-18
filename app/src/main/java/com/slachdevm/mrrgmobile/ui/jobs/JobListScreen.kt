@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
@@ -59,8 +60,10 @@ fun JobListScreen(
     viewModel: JobListViewModel,
     notificationUnreadCount: Long,
     onNotificationsClick: () -> Unit,
+    onSettingsClick: () -> Unit,
+    onProfileClick: () -> Unit,
     onJobClick: (Long) -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
 ) {
     val state = viewModel.uiState
     val hour = java.time.LocalTime.now().hour
@@ -98,6 +101,15 @@ fun JobListScreen(
                 },
                 actions = {
 
+                    IconButton(
+                        onClick = onProfileClick
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Profile"
+                        )
+                    }
+
                     BadgedBox(
                         badge = {
                             if (notificationUnreadCount > 0) {
@@ -122,6 +134,13 @@ fun JobListScreen(
                             else
                                 Icons.Default.CalendarViewDay,
                             contentDescription = "Toggle View Mode"
+                        )
+                    }
+
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings"
                         )
                     }
 

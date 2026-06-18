@@ -22,6 +22,7 @@ import com.slachdevm.mrrgmobile.data.api.RetrofitClient
 import com.slachdevm.mrrgmobile.data.repository.AuthRepository
 import com.slachdevm.mrrgmobile.data.repository.JobRepository
 import com.slachdevm.mrrgmobile.data.repository.NotificationRepository
+import com.slachdevm.mrrgmobile.data.repository.ProfileRepository
 import com.slachdevm.mrrgmobile.ui.auth.LoginScreen
 import com.slachdevm.mrrgmobile.ui.auth.LoginViewModel
 import com.slachdevm.mrrgmobile.ui.jobs.JobDetailScreen
@@ -30,11 +31,15 @@ import com.slachdevm.mrrgmobile.ui.jobs.JobListScreen
 import com.slachdevm.mrrgmobile.ui.jobs.JobListViewModel
 import com.slachdevm.mrrgmobile.ui.notifications.NotificationScreen
 import com.slachdevm.mrrgmobile.ui.notifications.NotificationViewModel
+import com.slachdevm.mrrgmobile.ui.profile.ProfileScreen
+import com.slachdevm.mrrgmobile.ui.profile.ProfileViewModel
+import com.slachdevm.mrrgmobile.ui.settings.SettingsScreen
 
 object Routes {
     const val LOGIN = "login"
     const val JOBS = "jobs"
-
+    const val PROFILE = "profile"
+    const val SETTINGS = "settings"
     const val NOTIFICATIONS = "notifications"
     const val JOB_ID_ARG = "jobId"
     const val JOB_DETAIL = "job_detail/{$JOB_ID_ARG}"
@@ -126,6 +131,12 @@ fun AppNavigation(modifier: Modifier = Modifier, initialJobId: Long? = null) {
                 onNotificationsClick = {
                     navController.navigate(Routes.NOTIFICATIONS)
                 },
+                onSettingsClick = {
+                    navController.navigate(Routes.SETTINGS)
+                },
+                onProfileClick = {
+                    navController.navigate(Routes.PROFILE)
+                },
                 onJobClick = { jobId ->
                     navController.navigate(Routes.jobDetail(jobId))
                 },
@@ -166,6 +177,38 @@ fun AppNavigation(modifier: Modifier = Modifier, initialJobId: Long? = null) {
                     notificationViewModel.loadUnreadCount()
                     navController.popBackStack()
                     navController.navigate(Routes.jobDetail(jobId))
+                }
+            )
+        }
+
+        composable(Routes.PROFILE) {
+            val profileRepository = remember {
+                ProfileRepository(userApi)
+            }
+
+            val profileViewModel: ProfileViewModel = viewModel(
+                factory = viewModelFactory {
+                    initializer {
+                        ProfileViewModel(profileRepository)
+                    }
+                }
+            )
+
+            ProfileScreen(
+                viewModel = profileViewModel
+            )
+        }
+
+        composable(Routes.SETTINGS) {
+            SettingsScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onLogoutClick = {
+                    authRepository.logout()
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.JOBS) { inclusive = true }
+                    }
                 }
             )
         }
