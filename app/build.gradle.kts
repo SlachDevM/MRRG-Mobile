@@ -41,6 +41,8 @@ android {
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(platform(libs.firebase.bom))
+    implementation(libs.androidx.compose.animation)
+    implementation(libs.androidx.compose.foundation)
     implementation(libs.firebase.messaging)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

@@ -1,5 +1,16 @@
 package com.slachdevm.mrrgmobile.ui.jobs
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -42,6 +52,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -53,6 +64,9 @@ import com.slachdevm.mrrgmobile.ui.components.toLabel
 import com.slachdevm.mrrgmobile.ui.components.toPriorityLabel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,6 +81,12 @@ fun JobListScreen(
 ) {
     val state = viewModel.uiState
     val hour = java.time.LocalTime.now().hour
+
+    val badgeScale by animateFloatAsState(
+        targetValue = if (notificationUnreadCount > 0) 1f else 0f,
+        animationSpec = tween(180),
+        label = "NotificationBadgeScaleAnimation"
+    )
 
     val greeting = when (hour) {
         in 5..11 -> "Good morning"
@@ -113,13 +133,20 @@ fun JobListScreen(
                     BadgedBox(
                         badge = {
                             if (notificationUnreadCount > 0) {
-                                Badge {
+                                Badge(
+                                    modifier = Modifier.graphicsLayer {
+                                        scaleX = badgeScale
+                                        scaleY = badgeScale
+                                    }
+                                ) {
                                     Text(notificationUnreadCount.toString())
                                 }
                             }
                         }
                     ) {
-                        IconButton(onClick = onNotificationsClick) {
+                        IconButton(
+                            onClick = onNotificationsClick
+                        ) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
                                 contentDescription = "Notifications"
@@ -172,15 +199,27 @@ fun JobListScreen(
 
                 val endDate =
                     state.selectedDate.plusDays(if (state.viewMode == ViewMode.DAY_3) 2 else 6)
-                Text(
-                    text = "${state.selectedDate.format(DateTimeFormatter.ofPattern("MMM dd"))} - ${
-                        endDate.format(
-                            DateTimeFormatter.ofPattern("MMM dd")
-                        )
-                    }",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                AnimatedContent(
+                    targetState = state.selectedDate to endDate,
+                    transitionSpec = {
+                        fadeIn(animationSpec = tween(220)) + slideInHorizontally(
+                            animationSpec = tween(220),
+                            initialOffsetX = { it / 4 }
+                        ) togetherWith fadeOut(animationSpec = tween(120)) + slideOutHorizontally(
+                            animationSpec = tween(120),
+                            targetOffsetX = { -it / 4 }
+                        ) using SizeTransform(clip = false)
+                    },
+                    label = "DateRangeAnimation"
+                ) { (startDate, endDate) ->
+                    Text(
+                        text = "${startDate.format(DateTimeFormatter.ofPattern("MMM dd"))} - ${
+                            endDate.format(DateTimeFormatter.ofPattern("MMM dd"))
+                        }",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
 
                 IconButton(onClick = { viewModel.nextDateRange() }) {
                     Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next")
@@ -196,85 +235,110 @@ fun JobListScreen(
                 onRefresh = { viewModel.refreshJobs() },
                 modifier = Modifier.fillMaxSize()
             ) {
-                if (state.isLoading && state.jobsByDate.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                } else if (state.error != null && state.jobsByDate.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = state.error,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                } else {
-                    val hasJobs = state.jobsByDate.values.any { it.isNotEmpty() }
-                    val daysToShow = if (state.viewMode == ViewMode.DAY_3) 3 else 7
-                    if (!state.isLoading && !hasJobs) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                                        alpha = 0.6f
-                                    )
-                                )
+                val hasJobs = state.jobsByDate.values.any { it.isNotEmpty() }
+                val daysToShow = if (state.viewMode == ViewMode.DAY_3) 3 else 7
+
+                val dashboardContentState = when {
+                    state.isLoading && state.jobsByDate.isEmpty() -> "loading"
+                    state.error != null && state.jobsByDate.isEmpty() -> "error"
+                    !state.isLoading && !hasJobs -> "empty"
+                    else -> "content"
+                }
+
+                Crossfade(
+                    targetState = dashboardContentState,
+                    label = "DashboardContentAnimation"
+                ) { contentState ->
+                    when (contentState) {
+                        "loading" -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.CalendarMonth,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(32.dp),
-                                        tint = MaterialTheme.colorScheme.outline
+                                CircularProgressIndicator()
+                            }
+                        }
+
+                        "error" -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = state.error ?: "Something went wrong",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+
+                        "empty" -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                                            alpha = 0.6f
+                                        )
                                     )
-
-                                    Spacer(modifier = Modifier.width(12.dp))
-
-                                    Column {
-                                        Text(
-                                            text = "No jobs scheduled",
-                                            style = MaterialTheme.typography.titleSmall
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(16.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.CalendarMonth,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(32.dp),
+                                            tint = MaterialTheme.colorScheme.outline
                                         )
 
-                                        Text(
-                                            text = "No work planned for this period.",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.outline
-                                        )
+                                        Spacer(modifier = Modifier.width(12.dp))
+
+                                        Column {
+                                            Text(
+                                                text = "No jobs scheduled",
+                                                style = MaterialTheme.typography.titleSmall
+                                            )
+
+                                            Text(
+                                                text = "No work planned for this period.",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.outline
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp)
-                        ) {
-                            items((0 until daysToShow).toList()) { index ->
-                                val date = state.selectedDate.plusDays(index.toLong())
-                                val jobsForDate = state.jobsByDate[date] ?: emptyList()
 
-                                DaySection(
-                                    date = date,
-                                    jobs = jobsForDate,
-                                    currentUserName = state.userName ?: "",
-                                    currentUserRole = state.userRole,
-                                    onJobClick = onJobClick
-                                )
+                        else -> {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp)
+                            ) {
+                                items(
+                                    count = daysToShow,
+                                    key = { index ->
+                                        state.selectedDate.plusDays(index.toLong())
+                                    }
+                                ) { index ->
+                                    val date = state.selectedDate.plusDays(index.toLong())
+                                    val jobsForDate = state.jobsByDate[date] ?: emptyList()
+
+                                    DaySection(
+                                        modifier = Modifier.animateItem(),
+                                        date = date,
+                                        jobs = jobsForDate,
+                                        currentUserName = state.userName ?: "",
+                                        currentUserRole = state.userRole,
+                                        onJobClick = onJobClick
+                                    )
+                                }
                             }
                         }
                     }
@@ -286,13 +350,14 @@ fun JobListScreen(
 
 @Composable
 fun DaySection(
+    modifier: Modifier = Modifier,
     date: LocalDate,
     jobs: List<Job>,
     currentUserName: String,
     currentUserRole: UserRole?,
     onJobClick: (Long) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -368,12 +433,24 @@ fun JobItem(
     canEdit: Boolean,
     onClick: () -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed && canEdit) 0.98f else 1f,
+        animationSpec = tween(120),
+        label = "JobCardPressAnimation"
+    )
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            },
         onClick = onClick,
         enabled = canEdit,
+        interactionSource = interactionSource,
         colors = if (canEdit) {
             CardDefaults.cardColors()
         } else {

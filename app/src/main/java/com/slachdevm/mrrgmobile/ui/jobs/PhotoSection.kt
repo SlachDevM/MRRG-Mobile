@@ -59,8 +59,12 @@ fun PhotoSection(
             )
         } else {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(photos) { photoUrl ->
+                items(
+                    items = photos,
+                    key = { it.hashCode() }
+                ) { photoUrl ->
                     PhotoThumbnail(
+                        modifier = Modifier.animateItem(),
                         photoUrl = photoUrl,
                         onOpenPhoto = { selectedPhoto = photoUrl },
                         onDeletePhoto = { onDeletePhoto(photoUrl) }
@@ -101,11 +105,12 @@ private fun PhotoSectionHeader(
 
 @Composable
 private fun PhotoThumbnail(
+    modifier: Modifier = Modifier,
     photoUrl: String,
     onOpenPhoto: () -> Unit,
     onDeletePhoto: () -> Unit
 ) {
-    Box(modifier = Modifier.size(120.dp)) {
+    Box(modifier = modifier.size(120.dp)) {
         Card(
             modifier = Modifier
                 .fillMaxSize()

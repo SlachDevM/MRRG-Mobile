@@ -1,11 +1,14 @@
 package com.slachdevm.mrrgmobile.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.slachdevm.mrrgmobile.domain.model.JobStatus
+import androidx.compose.runtime.getValue
 
 @Composable
 fun StatusChip(status: JobStatus) {
@@ -19,12 +22,24 @@ fun StatusChip(status: JobStatus) {
         JobStatus.TO_BE_FIXED -> "🔴 Callback" to Color(0xFFF44336)
     }
 
+    val animatedContainerColor by animateColorAsState(
+        targetValue = color.copy(alpha = 0.15f),
+        animationSpec = tween(250),
+        label = "StatusChipContainerColorAnimation"
+    )
+
+    val animatedLabelColor by animateColorAsState(
+        targetValue = color,
+        animationSpec = tween(250),
+        label = "StatusChipLabelColorAnimation"
+    )
+
     AssistChip(
         onClick = {},
         label = { Text(label) },
         colors = AssistChipDefaults.assistChipColors(
-            containerColor = color.copy(alpha = 0.15f),
-            labelColor = color
+            containerColor = animatedContainerColor,
+            labelColor = animatedLabelColor
         )
     )
 }

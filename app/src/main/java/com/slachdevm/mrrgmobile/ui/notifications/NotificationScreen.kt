@@ -1,5 +1,10 @@
 package com.slachdevm.mrrgmobile.ui.notifications
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -76,7 +81,11 @@ fun NotificationScreen(
                     }
                 },
                 actions = {
-                    if (state.notifications.any { !it.read }) {
+                    AnimatedVisibility(
+                        visible = state.notifications.any { !it.read },
+                        enter = fadeIn() + scaleIn(),
+                        exit = fadeOut() + scaleOut()
+                    ) {
                         IconButton(onClick = { viewModel.markAllAsRead() }) {
                             Icon(
                                 imageVector = Icons.Default.MarkEmailRead,
@@ -186,16 +195,22 @@ fun NotificationItem(
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                if (!notification.read) {
-                    AssistChip(
-                        onClick = {},
-                        enabled = false,
-                        label = {
-                            Text("Unread")
-                        }
-                    )
+                AnimatedVisibility(
+                    visible = !notification.read,
+                    enter = fadeIn() + scaleIn(),
+                    exit = fadeOut() + scaleOut()
+                ) {
+                    Column {
+                        AssistChip(
+                            onClick = {},
+                            enabled = false,
+                            label = {
+                                Text("Unread")
+                            }
+                        )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                 }
                 Text(
                     text = notificationTitle(notification.type),
