@@ -34,6 +34,7 @@ import com.slachdevm.mrrgmobile.ui.notifications.NotificationViewModel
 import com.slachdevm.mrrgmobile.ui.profile.ProfileScreen
 import com.slachdevm.mrrgmobile.ui.profile.ProfileViewModel
 import com.slachdevm.mrrgmobile.ui.settings.SettingsScreen
+import com.slachdevm.mrrgmobile.ui.theme.ThemeMode
 
 object Routes {
     const val LOGIN = "login"
@@ -48,7 +49,10 @@ object Routes {
 }
 
 @Composable
-fun AppNavigation(modifier: Modifier = Modifier, initialJobId: Long? = null) {
+fun AppNavigation(modifier: Modifier = Modifier,
+                  initialJobId: Long? = null,
+                  themeMode: ThemeMode,
+                  onThemeModeChange: (ThemeMode) -> Unit) {
     val navController = rememberNavController()
     LaunchedEffect(initialJobId) {
         initialJobId?.let { jobId ->
@@ -201,6 +205,8 @@ fun AppNavigation(modifier: Modifier = Modifier, initialJobId: Long? = null) {
 
         composable(Routes.SETTINGS) {
             SettingsScreen(
+                themeMode = themeMode,
+                onThemeModeChange = onThemeModeChange,
                 onBackClick = {
                     navController.popBackStack()
                 },

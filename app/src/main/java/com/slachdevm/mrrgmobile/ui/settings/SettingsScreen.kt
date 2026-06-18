@@ -21,13 +21,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.FilterChip
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.slachdevm.mrrgmobile.ui.theme.ThemeMode
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    themeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit,
     onBackClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
@@ -74,7 +78,7 @@ fun SettingsScreen(
 
             ListItem(
                 headlineContent = { Text("Theme") },
-                supportingContent = { Text("System default") },
+                supportingContent = { Text(themeMode.name.lowercase().replaceFirstChar { it.uppercase() }) },
                 leadingContent = {
                     Icon(
                         imageVector = Icons.Default.Palette,
@@ -82,6 +86,28 @@ fun SettingsScreen(
                     )
                 }
             )
+
+            Column(
+                modifier = Modifier.padding(start = 56.dp, end = 16.dp, bottom = 8.dp)
+            ) {
+                FilterChip(
+                    selected = themeMode == ThemeMode.SYSTEM,
+                    onClick = { onThemeModeChange(ThemeMode.SYSTEM) },
+                    label = { Text("System") }
+                )
+
+                FilterChip(
+                    selected = themeMode == ThemeMode.LIGHT,
+                    onClick = { onThemeModeChange(ThemeMode.LIGHT) },
+                    label = { Text("Light") }
+                )
+
+                FilterChip(
+                    selected = themeMode == ThemeMode.DARK,
+                    onClick = { onThemeModeChange(ThemeMode.DARK) },
+                    label = { Text("Dark") }
+                )
+            }
 
             HorizontalDivider()
 
