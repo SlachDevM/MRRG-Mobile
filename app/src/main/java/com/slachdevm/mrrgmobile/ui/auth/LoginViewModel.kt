@@ -1,8 +1,10 @@
 package com.slachdevm.mrrgmobile.ui.auth
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slachdevm.mrrgmobile.data.repository.AuthRepository
+import com.slachdevm.mrrgmobile.fcm.FcmTokenManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,6 +57,17 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
                         isLoggedIn = true,
                         errorMessage = null
                     )
+                    val fcmToken = FcmTokenManager().getToken()
+
+                    if (!fcmToken.isNullOrBlank()) {
+                        authRepository.updateFcmToken(fcmToken)
+                            .onSuccess {
+                                Log.d("MRRG_FCM", "FCM token sent to backend")
+                            }
+                            .onFailure { error ->
+                                Log.e("MRRG_FCM", "Failed to send FCM token to backend", error)
+                            }
+                    }
                 }
                 .onFailure { exception ->
                     _uiStateFlow.value = _uiStateFlow.value.copy(

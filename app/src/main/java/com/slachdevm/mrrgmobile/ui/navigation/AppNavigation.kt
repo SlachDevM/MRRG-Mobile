@@ -17,7 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.slachdevm.mrrgmobile.data.SessionManager
+import com.slachdevm.mrrgmobile.data.session.SessionManager
 import com.slachdevm.mrrgmobile.data.api.RetrofitClient
 import com.slachdevm.mrrgmobile.data.repository.AuthRepository
 import com.slachdevm.mrrgmobile.data.repository.JobRepository
@@ -43,12 +43,20 @@ object Routes {
 }
 
 @Composable
-fun AppNavigation(modifier: Modifier = Modifier) {
+fun AppNavigation(modifier: Modifier = Modifier, initialJobId: Long? = null) {
     val navController = rememberNavController()
+    LaunchedEffect(initialJobId) {
+        initialJobId?.let { jobId ->
+            navController.navigate(Routes.jobDetail(jobId))
+        }
+    }
     val context = LocalContext.current
 
+    val userApi = remember {
+        RetrofitClient.createUserApi()
+    }
     val sessionManager = remember { SessionManager(context) }
-    val authRepository = remember { AuthRepository(RetrofitClient.authApi, sessionManager) }
+    val authRepository = remember { AuthRepository(RetrofitClient.authApi, userApi, sessionManager) }
     val jobRepository = remember { JobRepository(RetrofitClient.jobApi) }
     val notificationRepository = remember {
         NotificationRepository(RetrofitClient.notificationApi)

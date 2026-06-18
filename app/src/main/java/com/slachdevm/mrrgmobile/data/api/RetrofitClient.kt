@@ -1,5 +1,6 @@
 package com.slachdevm.mrrgmobile.data.api
 
+import com.slachdevm.mrrgmobile.data.api.UserApi
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -16,6 +17,11 @@ object RetrofitClient {
 
     fun setAuthToken(token: String?) {
         authToken = token
+    }
+
+
+    fun createUserApi(): UserApi {
+        return retrofit.create(UserApi::class.java)
     }
 
     val loggingInterceptor = HttpLoggingInterceptor().apply {

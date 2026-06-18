@@ -1,4 +1,4 @@
-package com.slachdevm.mrrgmobile.data
+package com.slachdevm.mrrgmobile.data.session
 
 import android.content.Context
 import android.content.SharedPreferences

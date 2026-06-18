@@ -1,14 +1,17 @@
 package com.slachdevm.mrrgmobile.data.repository
 
-import com.slachdevm.mrrgmobile.data.SessionManager
+import com.slachdevm.mrrgmobile.data.session.SessionManager
 import com.slachdevm.mrrgmobile.data.api.AuthApi
 import com.slachdevm.mrrgmobile.data.api.RetrofitClient
 import com.slachdevm.mrrgmobile.data.dto.LoginRequestDto
 import com.slachdevm.mrrgmobile.data.dto.LoginResponseDto
+import com.slachdevm.mrrgmobile.data.model.FcmTokenRequest
+import com.slachdevm.mrrgmobile.data.api.UserApi
 import com.slachdevm.mrrgmobile.domain.model.UserRole
 
 class AuthRepository(
     private val authApi: AuthApi,
+    private val userApi: UserApi,
     private val sessionManager: SessionManager
 ) {
 
@@ -41,6 +44,20 @@ class AuthRepository(
             }
         } catch (exception: Exception) {
             Result.failure(exception)
+        }
+    }
+
+    suspend fun updateFcmToken(token: String): Result<Unit> {
+        return try {
+            val response = userApi.updateFcmToken(FcmTokenRequest(token))
+
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Failed to update FCM token: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
