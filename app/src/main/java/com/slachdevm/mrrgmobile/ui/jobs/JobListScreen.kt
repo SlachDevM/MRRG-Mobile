@@ -67,6 +67,7 @@ import java.time.format.DateTimeFormatter
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import com.slachdevm.mrrgmobile.ui.components.OfflineIndicator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -120,65 +121,76 @@ fun JobListScreen(
                     }
                 },
                 actions = {
-
-                    IconButton(
-                        onClick = onProfileClick
+                    Column(
+                        horizontalAlignment = Alignment.End
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Profile"
-                        )
-                    }
-
-                    BadgedBox(
-                        badge = {
-                            if (notificationUnreadCount > 0) {
-                                Badge(
-                                    modifier = Modifier.graphicsLayer {
-                                        scaleX = badgeScale
-                                        scaleY = badgeScale
-                                    }
-                                ) {
-                                    Text(notificationUnreadCount.toString())
-                                }
-                            }
-                        }
-                    ) {
-                        IconButton(
-                            onClick = onNotificationsClick
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Notifications,
-                                contentDescription = "Notifications"
+                        if (state.isOfflineData) {
+                            OfflineIndicator(
+                                modifier = Modifier.padding(end = 8.dp)
                             )
                         }
-                    }
 
-                    IconButton(onClick = { viewModel.toggleViewMode() }) {
-                        Icon(
-                            imageVector = if (state.viewMode == ViewMode.DAY_3)
-                                Icons.Default.CalendarMonth
-                            else
-                                Icons.Default.CalendarViewDay,
-                            contentDescription = "Toggle View Mode"
-                        )
-                    }
+                        Row {
+                            IconButton(
+                                onClick = onProfileClick
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = "Profile"
+                                )
+                            }
 
-                    IconButton(onClick = onSettingsClick) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings"
-                        )
-                    }
+                            BadgedBox(
+                                badge = {
+                                    if (notificationUnreadCount > 0) {
+                                        Badge(
+                                            modifier = Modifier.graphicsLayer {
+                                                scaleX = badgeScale
+                                                scaleY = badgeScale
+                                            }
+                                        ) {
+                                            Text(notificationUnreadCount.toString())
+                                        }
+                                    }
+                                }
+                            ) {
+                                IconButton(
+                                    onClick = onNotificationsClick
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Notifications,
+                                        contentDescription = "Notifications"
+                                    )
+                                }
+                            }
 
-                    IconButton(onClick = {
-                        viewModel.logout()
-                        onLogout()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Logout,
-                            contentDescription = "Logout"
-                        )
+                            IconButton(onClick = { viewModel.toggleViewMode() }) {
+                                Icon(
+                                    imageVector = if (state.viewMode == ViewMode.DAY_3)
+                                        Icons.Default.CalendarMonth
+                                    else
+                                        Icons.Default.CalendarViewDay,
+                                    contentDescription = "Toggle View Mode"
+                                )
+                            }
+
+                            IconButton(onClick = onSettingsClick) {
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = "Settings"
+                                )
+                            }
+
+                            IconButton(onClick = {
+                                viewModel.logout()
+                                onLogout()
+                            }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.Logout,
+                                    contentDescription = "Logout"
+                                )
+                            }
+                        }
                     }
                 }
             )
