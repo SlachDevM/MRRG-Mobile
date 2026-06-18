@@ -60,8 +60,6 @@ class NotificationHelper(
 
         NotificationManagerCompat.from(context)
             .notify(System.currentTimeMillis().toInt(), notification)
-        NotificationManagerCompat.from(context)
-            .notify(System.currentTimeMillis().toInt(), notification)
     }
 
     private fun createNotificationChannel() {

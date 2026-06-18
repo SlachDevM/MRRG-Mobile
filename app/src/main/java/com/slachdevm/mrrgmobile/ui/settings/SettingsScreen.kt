@@ -25,6 +25,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.slachdevm.mrrgmobile.BuildConfig
 import com.slachdevm.mrrgmobile.ui.theme.ThemeMode
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -113,7 +114,7 @@ fun SettingsScreen(
 
             ListItem(
                 headlineContent = { Text("App version") },
-                supportingContent = { Text("1.0.0") },
+                supportingContent = { Text(BuildConfig.VERSION_NAME) },
                 leadingContent = {
                     Icon(
                         imageVector = Icons.Default.Info,

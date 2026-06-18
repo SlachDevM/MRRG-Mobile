@@ -10,16 +10,16 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import com.slachdevm.mrrgmobile.fcm.NotificationHelper
 import com.slachdevm.mrrgmobile.ui.components.snackbar.AppSnackbarHost
 import com.slachdevm.mrrgmobile.ui.navigation.AppNavigation
 import com.slachdevm.mrrgmobile.ui.permissions.NotificationPermissionHelper
 import com.slachdevm.mrrgmobile.ui.theme.MRRGMobileTheme
 import com.slachdevm.mrrgmobile.ui.theme.ThemeMode
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import com.slachdevm.mrrgmobile.data.preferences.ThemePreferenceManager
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,7 +40,9 @@ class MainActivity : ComponentActivity() {
 
             val coroutineScope = rememberCoroutineScope()
             val snackbarHostState = remember { SnackbarHostState() }
-            MRRGMobileTheme (themeMode = themeMode){
+            MRRGMobileTheme (
+                themeMode = themeMode
+            ) {
                 Scaffold(
                     snackbarHost = {
                         AppSnackbarHost(snackbarHostState)

@@ -1,17 +1,23 @@
 package com.slachdevm.mrrgmobile.data.api
 
-import com.slachdevm.mrrgmobile.data.api.UserApi
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import com.slachdevm.mrrgmobile.BuildConfig
 
 object RetrofitClient {
-    const val BASE_URL = "http://10.0.2.2:4000"
+    const val BASE_URL = BuildConfig.BASE_URL
+    val loggingInterceptor = HttpLoggingInterceptor().apply {
+        level = if (BuildConfig.DEBUG) {
+            HttpLoggingInterceptor.Level.BODY
+        } else {
+            HttpLoggingInterceptor.Level.NONE
+        }
+    }
     const val AUTHORIZATION_HEADER = "Authorization"
     const val BEARER_PREFIX = "Bearer "
-    private const val ENABLE_NETWORK_LOGS = true
 
     private var authToken: String? = null
 
@@ -22,14 +28,6 @@ object RetrofitClient {
 
     fun createUserApi(): UserApi {
         return retrofit.create(UserApi::class.java)
-    }
-
-    val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = if (ENABLE_NETWORK_LOGS) {
-            HttpLoggingInterceptor.Level.BODY
-        } else {
-            HttpLoggingInterceptor.Level.NONE
-        }
     }
 
     private val authInterceptor = Interceptor { chain ->

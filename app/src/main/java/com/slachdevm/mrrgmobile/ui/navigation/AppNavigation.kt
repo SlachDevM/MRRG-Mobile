@@ -51,10 +51,12 @@ object Routes {
 }
 
 @Composable
-fun AppNavigation(modifier: Modifier = Modifier,
-                  initialJobId: Long? = null,
-                  themeMode: ThemeMode,
-                  onThemeModeChange: (ThemeMode) -> Unit) {
+fun AppNavigation(
+    modifier: Modifier = Modifier,
+    initialJobId: Long? = null,
+    themeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit
+) {
     val navController = rememberNavController()
     LaunchedEffect(initialJobId) {
         initialJobId?.let { jobId ->
@@ -180,7 +182,7 @@ fun AppNavigation(modifier: Modifier = Modifier,
 
         composable(
             route = Routes.JOB_DETAIL,
-            arguments = listOf(navArgument(Routes.JOB_ID_ARG ) { type = NavType.LongType })
+            arguments = listOf(navArgument(Routes.JOB_ID_ARG) { type = NavType.LongType })
         ) { backStackEntry ->
             val jobId = backStackEntry.arguments?.getLong(Routes.JOB_ID_ARG ) ?: return@composable
             val jobDetailViewModel: JobDetailViewModel = viewModel(
