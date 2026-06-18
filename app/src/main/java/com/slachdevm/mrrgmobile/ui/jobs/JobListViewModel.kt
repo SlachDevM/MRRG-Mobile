@@ -26,6 +26,7 @@ data class JobListUiState(
     val userName: String? = null,
     val userRole: UserRole? = null,
     val isLoading: Boolean = false,
+    val isOfflineData: Boolean = false,
     val error: String? = null,
     val viewMode: ViewMode = ViewMode.DAY_3,
     val selectedDate: LocalDate = LocalDate.now()
@@ -60,15 +61,24 @@ class JobListViewModel(
             val result = jobRepository.getScheduledJobs(startMillis, endMillis)
             
             uiState = if (result.isSuccess) {
-                val jobs = result.getOrDefault(emptyList())
+                val dataSourceResult = result.getOrNull()
+                val jobs = dataSourceResult?.data.orEmpty()
                 val grouped = jobs.filter { it.jobDate != null }.groupBy {
                     Instant.ofEpochMilli(it.jobDate!!).atZone(ZoneId.systemDefault()).toLocalDate()
                 }
                 onSuccess?.invoke()
-                uiState.copy(jobsByDate = grouped, isLoading = false)
+                uiState.copy(
+                    jobsByDate = grouped,
+                    isLoading = false,
+                    isOfflineData = dataSourceResult?.isOfflineData == true
+                )
             } else {
                 AppSnackbarManager.showError(NETWORK_ERROR)
-                uiState.copy(isLoading = false, error = result.exceptionOrNull()?.message ?: "Failed to load jobs")
+                uiState.copy(
+                    isLoading = false,
+                    isOfflineData = false,
+                    error = result.exceptionOrNull()?.message ?: "Failed to load jobs"
+                )
             }
         }
     }

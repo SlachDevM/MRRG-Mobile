@@ -1,46 +1,98 @@
 package com.slachdevm.mrrgmobile.data.repository
 
 import com.slachdevm.mrrgmobile.data.api.JobApi
+import com.slachdevm.mrrgmobile.data.local.dao.JobDao
 import com.slachdevm.mrrgmobile.domain.model.Job
+import com.slachdevm.mrrgmobile.data.local.mapper.toDomain
+import com.slachdevm.mrrgmobile.data.local.mapper.toEntity
+import com.slachdevm.mrrgmobile.data.model.DataSourceResult
 
-class JobRepository(private val jobApi: JobApi) {
+class JobRepository(
+    private val jobApi: JobApi,
+    private val jobDao: JobDao
+) {
 
-    suspend fun getPendingJobs(): Result<List<Job>> {
-        return try {
-            val response = jobApi.getPendingJobs()
-            if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
-            } else {
-                Result.failure(Exception("Failed to fetch pending jobs: ${response.code()}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    suspend fun getScheduledJobs(weekStart: Long, weekEnd: Long): Result<List<Job>> {
+    suspend fun getScheduledJobs(
+        weekStart: Long,
+        weekEnd: Long
+    ): Result<DataSourceResult<List<Job>>> {
         return try {
             val response = jobApi.getScheduledJobs(weekStart, weekEnd)
+
             if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
+                val remoteJobs = response.body()!!
+
+                jobDao.upsertJobs(
+                    remoteJobs.mapNotNull { it.toEntity() }
+                )
+
+                Result.success(
+                    DataSourceResult(
+                        data = remoteJobs,
+                        isOfflineData = false
+                    )
+                )
             } else {
-                Result.failure(Exception("Failed to fetch scheduled jobs: ${response.code()}"))
+                val cachedJobs = jobDao.getScheduledJobs(weekStart, weekEnd)
+                    .map { it.toDomain() }
+
+                if (cachedJobs.isNotEmpty()) {
+                    Result.success(
+                        DataSourceResult(
+                            data = cachedJobs,
+                            isOfflineData = true
+                        )
+                    )
+                } else {
+                    Result.failure(
+                        Exception("Failed to fetch scheduled jobs: ${response.code()}")
+                    )
+                }
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            val cachedJobs = jobDao.getScheduledJobs(weekStart, weekEnd)
+                .map { it.toDomain() }
+
+            if (cachedJobs.isNotEmpty()) {
+                Result.success(
+                    DataSourceResult(
+                        data = cachedJobs,
+                        isOfflineData = true
+                    )
+                )
+            } else {
+                Result.failure(e)
+            }
         }
     }
 
     suspend fun getJobDetails(id: Long): Result<Job> {
         return try {
             val response = jobApi.getJobDetails(id)
+
             if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
+                val remoteJob = response.body()!!
+
+                remoteJob.toEntity()?.let { jobDao.upsertJob(it) }
+
+                Result.success(remoteJob)
             } else {
-                Result.failure(Exception("Failed to fetch job details: ${response.code()}"))
+                val cachedJob = jobDao.getJobById(id)?.toDomain()
+
+                if (cachedJob != null) {
+                    Result.success(cachedJob)
+                } else {
+                    Result.failure(Exception("Failed to fetch job details: ${response.code()}"))
+                }
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            val cachedJob = jobDao.getJobById(id)?.toDomain()
+
+            if (cachedJob != null) {
+                Result.success(cachedJob)
+            } else {
+                Result.failure(e)
+            }
         }
     }
 

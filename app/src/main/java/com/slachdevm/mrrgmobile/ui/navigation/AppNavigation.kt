@@ -21,6 +21,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.slachdevm.mrrgmobile.data.session.SessionManager
 import com.slachdevm.mrrgmobile.data.api.RetrofitClient
+import com.slachdevm.mrrgmobile.data.api.UserApi
 import com.slachdevm.mrrgmobile.data.repository.AuthRepository
 import com.slachdevm.mrrgmobile.data.repository.JobRepository
 import com.slachdevm.mrrgmobile.data.repository.NotificationRepository
@@ -37,6 +38,8 @@ import com.slachdevm.mrrgmobile.ui.profile.ProfileScreen
 import com.slachdevm.mrrgmobile.ui.profile.ProfileViewModel
 import com.slachdevm.mrrgmobile.ui.settings.SettingsScreen
 import com.slachdevm.mrrgmobile.ui.theme.ThemeMode
+import com.slachdevm.mrrgmobile.data.local.MRRGDatabase
+import com.slachdevm.mrrgmobile.data.local.dao.UserProfileDao
 
 object Routes {
     const val LOGIN = "login"
@@ -65,12 +68,21 @@ fun AppNavigation(
     }
     val context = LocalContext.current
 
+    val database = remember {
+        MRRGDatabase.getInstance(context)
+    }
+
     val userApi = remember {
         RetrofitClient.createUserApi()
     }
     val sessionManager = remember { SessionManager(context) }
     val authRepository = remember { AuthRepository(RetrofitClient.authApi, userApi, sessionManager) }
-    val jobRepository = remember { JobRepository(RetrofitClient.jobApi) }
+    val jobRepository = remember {
+        JobRepository(
+            jobApi = RetrofitClient.jobApi,
+            jobDao = database.jobDao()
+        )
+    }
     val notificationRepository = remember {
         NotificationRepository(RetrofitClient.notificationApi)
     }
@@ -215,7 +227,10 @@ fun AppNavigation(
 
         composable(Routes.PROFILE) {
             val profileRepository = remember {
-                ProfileRepository(userApi)
+                ProfileRepository(
+                    userApi = RetrofitClient.userApi,
+                    userProfileDao = database.userProfileDao()
+                )
             }
 
             val profileViewModel: ProfileViewModel = viewModel(

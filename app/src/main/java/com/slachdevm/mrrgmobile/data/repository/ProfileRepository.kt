@@ -2,27 +2,41 @@ package com.slachdevm.mrrgmobile.data.repository
 
 import com.slachdevm.mrrgmobile.data.api.UserApi
 import com.slachdevm.mrrgmobile.data.dto.UserProfileDto
+import com.slachdevm.mrrgmobile.data.local.dao.UserProfileDao
+import com.slachdevm.mrrgmobile.data.local.mapper.toDomain
+import com.slachdevm.mrrgmobile.data.local.mapper.toEntity
 
 class ProfileRepository(
-    private val userApi: UserApi
+    private val userApi: UserApi,
+    private val userProfileDao: UserProfileDao
 ) {
     suspend fun getCurrentUser(): Result<UserProfileDto> {
         return try {
             val response = userApi.getCurrentUser()
 
-            if (response.isSuccessful) {
-                val body = response.body()
+            if (response.isSuccessful && response.body() != null) {
+                val remoteProfile = response.body()!!
 
-                if (body != null) {
-                    Result.success(body)
-                } else {
-                    Result.failure(Exception("Empty profile response"))
-                }
+                userProfileDao.upsertProfile(remoteProfile.toEntity())
+
+                Result.success(remoteProfile)
             } else {
-                Result.failure(Exception("Failed to load profile: ${response.code()}"))
+                val cachedProfile = userProfileDao.getProfile()?.toDomain()
+
+                if (cachedProfile != null) {
+                    Result.success(cachedProfile)
+                } else {
+                    Result.failure(Exception("Failed to fetch profile: ${response.code()}"))
+                }
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            val cachedProfile = userProfileDao.getProfile()?.toDomain()
+
+            if (cachedProfile != null) {
+                Result.success(cachedProfile)
+            } else {
+                Result.failure(e)
+            }
         }
     }
 }
