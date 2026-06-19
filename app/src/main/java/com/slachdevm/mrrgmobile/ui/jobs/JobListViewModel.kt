@@ -69,9 +69,14 @@ class JobListViewModel(
             uiState = if (result.isSuccess) {
                 val dataSourceResult = result.getOrNull()
                 val jobs = dataSourceResult?.data.orEmpty()
-                val grouped = jobs.filter { it.jobDate != null }.groupBy {
-                    Instant.ofEpochMilli(it.jobDate!!).atZone(ZoneId.systemDefault()).toLocalDate()
-                }
+                val grouped = jobs.mapNotNull { job ->
+                    job.jobDate?.let { dateMillis ->
+                        val date = Instant.ofEpochMilli(dateMillis)
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate()
+                        date to job
+                    }
+                }.groupBy({ it.first }, { it.second })
                 onSuccess?.invoke()
                 uiState.copy(
                     jobsByDate = grouped,

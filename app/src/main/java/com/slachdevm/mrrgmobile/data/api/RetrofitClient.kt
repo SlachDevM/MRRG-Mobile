@@ -25,11 +25,6 @@ object RetrofitClient {
         authToken = token
     }
 
-
-    fun createUserApi(): UserApi {
-        return retrofit.create(UserApi::class.java)
-    }
-
     private val authInterceptor = Interceptor { chain ->
         val original = chain.request()
         val requestBuilder = original.newBuilder()

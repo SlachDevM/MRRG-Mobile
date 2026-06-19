@@ -9,8 +9,9 @@ class NotificationRepository(
     suspend fun getNotifications(): Result<List<Notification>> {
         return try {
             val response = api.getNotifications()
-            if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
+            val body = response.body()
+            if (response.isSuccessful && body != null) {
+                Result.success(body)
             } else {
                 Result.failure(Exception("Failed to load notifications"))
             }
@@ -22,8 +23,9 @@ class NotificationRepository(
     suspend fun getUnreadCount(): Result<Long> {
         return try {
             val response = api.getUnreadCount()
-            if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
+            val body = response.body()
+            if (response.isSuccessful && body != null) {
+                Result.success(body)
             } else {
                 Result.failure(Exception("Failed to load unread count"))
             }
@@ -35,8 +37,9 @@ class NotificationRepository(
     suspend fun markAsRead(id: Long): Result<Notification> {
         return try {
             val response = api.markAsRead(id)
-            if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
+            val body = response.body()
+            if (response.isSuccessful && body != null) {
+                Result.success(body)
             } else {
                 Result.failure(Exception("Failed to mark notification as read"))
             }

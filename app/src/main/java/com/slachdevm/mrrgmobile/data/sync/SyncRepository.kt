@@ -42,7 +42,7 @@ class SyncRepository(
 
                     if (BuildConfig.DEBUG) {
                         Log.w(
-                            "SyncRepository",
+                            TAG,
                             "Failed to sync ${item.type} for entity ${item.entityId}",
                             error
                         )
@@ -65,14 +65,19 @@ class SyncRepository(
 
         val response = jobApi.updateJob(jobId, job)
 
-        if (!response.isSuccessful || response.body() == null) {
+        val body = response.body()
+        if (!response.isSuccessful || body == null) {
             throw Exception("Failed to sync job update: ${response.code()}")
         }
 
-        val updatedJob = response.body()!!
+        val updatedJob = body
 
         updatedJob.toEntity()?.let { jobDao.upsertJob(it) }
 
         pendingSyncDao.deletePendingItem(syncId)
+    }
+
+    companion object {
+        private const val TAG = "SyncRepository"
     }
 }

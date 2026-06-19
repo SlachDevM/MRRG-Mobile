@@ -140,7 +140,7 @@ fun JobDetailScreen(
             if (base64 != null) {
                 viewModel.addPhoto(
                     url = base64,
-                    isBefore = selectedPhotoType == "before"
+                    isBefore = selectedPhotoType == PHOTO_TYPE_BEFORE
                 )
             }
         }
@@ -156,7 +156,7 @@ fun JobDetailScreen(
                 if (base64 != null) {
                     viewModel.addPhoto(
                         url = base64,
-                        isBefore = selectedPhotoType == "before"
+                        isBefore = selectedPhotoType == PHOTO_TYPE_BEFORE
                     )
                 }
             }
@@ -220,7 +220,7 @@ fun JobDetailScreen(
                     title = stringResource(R.string.before_photos),
                     photos = job.beforePhotos,
                     onAddPhoto = {
-                        selectedPhotoType = "before"
+                        selectedPhotoType = PHOTO_TYPE_BEFORE
                         showPhotoSourceDialog = true
                     },
                     onDeletePhoto = { viewModel.removePhoto(it, isBefore = true) }
@@ -232,7 +232,7 @@ fun JobDetailScreen(
                     title = stringResource(R.string.after_photos),
                     photos = job.afterPhotos,
                     onAddPhoto = {
-                        selectedPhotoType = "after"
+                        selectedPhotoType = PHOTO_TYPE_AFTER
                         showPhotoSourceDialog = true
                     },
                     onDeletePhoto = { viewModel.removePhoto(it, isBefore = false) }
@@ -300,3 +300,6 @@ fun JobDetailScreen(
         }
     }
 }
+
+private const val PHOTO_TYPE_BEFORE = "before"
+private const val PHOTO_TYPE_AFTER = "after"

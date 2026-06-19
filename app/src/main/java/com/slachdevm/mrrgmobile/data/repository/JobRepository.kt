@@ -26,8 +26,9 @@ class JobRepository(
         return try {
             val response = jobApi.getScheduledJobs(weekStart, weekEnd)
 
-            if (response.isSuccessful && response.body() != null) {
-                val remoteJobs = response.body()!!
+            val body = response.body()
+            if (response.isSuccessful && body != null) {
+                val remoteJobs = body
 
                 jobDao.upsertJobs(
                     remoteJobs.mapNotNull { it.toEntity() }
@@ -77,8 +78,9 @@ class JobRepository(
         return try {
             val response = jobApi.getJobDetails(id)
 
-            if (response.isSuccessful && response.body() != null) {
-                val remoteJob = response.body()!!
+            val body = response.body()
+            if (response.isSuccessful && body != null) {
+                val remoteJob = body
 
                 remoteJob.toEntity()?.let { jobDao.upsertJob(it) }
 
@@ -120,8 +122,9 @@ class JobRepository(
         return try {
             val response = jobApi.updateJob(id, job)
 
-            if (response.isSuccessful && response.body() != null) {
-                val updatedJob = response.body()!!
+            val body = response.body()
+            if (response.isSuccessful && body != null) {
+                val updatedJob = body
 
                 updatedJob.toEntity()?.let { jobDao.upsertJob(it) }
 

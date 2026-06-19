@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
-    private val LOG_TAG = "MRRG_FCM"
     private val _uiStateFlow = MutableStateFlow(LoginUiState())
     val uiStateFlow: StateFlow<LoginUiState> = _uiStateFlow.asStateFlow()
 
@@ -63,10 +62,10 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
                     if (!fcmToken.isNullOrBlank()) {
                         authRepository.updateFcmToken(fcmToken)
                             .onSuccess {
-                                Log.d(LOG_TAG, "FCM token sent to backend")
+                                Log.d(TAG, "FCM token sent to backend")
                             }
                             .onFailure { error ->
-                                Log.e(LOG_TAG, "Failed to send FCM token to backend", error)
+                                Log.e(TAG, "Failed to send FCM token to backend", error)
                             }
                     }
                 }
@@ -77,5 +76,9 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
                     )
                 }
         }
+    }
+
+    companion object {
+        private const val TAG = "MRRG_FCM"
     }
 }

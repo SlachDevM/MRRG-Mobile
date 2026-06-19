@@ -14,8 +14,9 @@ class ProfileRepository(
         return try {
             val response = userApi.getCurrentUser()
 
-            if (response.isSuccessful && response.body() != null) {
-                val remoteProfile = response.body()!!
+            val body = response.body()
+            if (response.isSuccessful && body != null) {
+                val remoteProfile = body
 
                 userProfileDao.upsertProfile(remoteProfile.toEntity())
 

@@ -69,39 +69,39 @@ fun ProfileScreen(
             }
 
             uiState.user != null -> {
-                val user = uiState.user!!
+                uiState.user?.let { user ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Card {
+                            Column(
+                                modifier = Modifier.padding(20.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = null
+                                )
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Card {
-                        Column(
-                            modifier = Modifier.padding(20.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = null
-                            )
+                                Text(
+                                    text = user.name,
+                                    style = MaterialTheme.typography.headlineSmall
+                                )
 
-                            Text(
-                                text = user.name,
-                                style = MaterialTheme.typography.headlineSmall
-                            )
+                                Text(
+                                    text = user.email,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
 
-                            Text(
-                                text = user.email,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-
-                            Text(
-                                text = user.role,
-                                style = MaterialTheme.typography.labelLarge
-                            )
+                                Text(
+                                    text = user.role,
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
                         }
                     }
                 }

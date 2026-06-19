@@ -70,7 +70,7 @@ fun AppNavigation(
     val database = remember { MRRGDatabase.getInstance(context) }
     val sessionManager = remember { SessionManager(context) }
     val authRepository = remember {
-        AuthRepository(RetrofitClient.authApi, RetrofitClient.createUserApi(), sessionManager)
+        AuthRepository(RetrofitClient.authApi, RetrofitClient.userApi, sessionManager)
     }
     val jobRepository = remember {
         JobRepository(RetrofitClient.jobApi, database.jobDao(), database.pendingSyncDao())
@@ -240,14 +240,16 @@ private fun provideProfileViewModel(profileRepository: ProfileRepository): Profi
 
 // Transition Helpers
 
+private const val TRANSITION_DURATION = 300
+
 private fun AnimatedContentTransitionScope<NavBackStackEntry>.slideIn(
     direction: AnimatedContentTransitionScope.SlideDirection
 ): EnterTransition {
-    return slideIntoContainer(direction, animationSpec = tween(300))
+    return slideIntoContainer(direction, animationSpec = tween(TRANSITION_DURATION))
 }
 
 private fun AnimatedContentTransitionScope<NavBackStackEntry>.slideOut(
     direction: AnimatedContentTransitionScope.SlideDirection
 ): ExitTransition {
-    return slideOutOfContainer(direction, animationSpec = tween(300))
+    return slideOutOfContainer(direction, animationSpec = tween(TRANSITION_DURATION))
 }
