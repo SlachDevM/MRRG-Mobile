@@ -13,8 +13,6 @@ class MrrgFirebaseMessagingService : FirebaseMessagingService() {
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "New FCM token: $token")
         }
-        // Étape suivante :
-        // envoyer ce token au backend pour l'associer au worker connecté.
     }
 
     override fun onMessageReceived(message: RemoteMessage) {

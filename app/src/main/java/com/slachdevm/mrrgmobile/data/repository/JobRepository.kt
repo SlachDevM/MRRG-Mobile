@@ -6,10 +6,10 @@ import com.slachdevm.mrrgmobile.data.local.dao.JobDao
 import com.slachdevm.mrrgmobile.data.local.dao.PendingSyncDao
 import com.slachdevm.mrrgmobile.data.local.entity.PendingSyncEntity
 import com.slachdevm.mrrgmobile.data.local.entity.PendingSyncType
-import com.slachdevm.mrrgmobile.domain.model.Job
 import com.slachdevm.mrrgmobile.data.local.mapper.toDomain
 import com.slachdevm.mrrgmobile.data.local.mapper.toEntity
 import com.slachdevm.mrrgmobile.data.model.DataSourceResult
+import com.slachdevm.mrrgmobile.domain.model.Job
 
 class JobRepository(
     private val jobApi: JobApi,

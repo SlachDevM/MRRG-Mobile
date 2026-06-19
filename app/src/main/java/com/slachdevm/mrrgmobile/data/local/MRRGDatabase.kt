@@ -7,10 +7,10 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.slachdevm.mrrgmobile.data.local.converter.JobConverters
 import com.slachdevm.mrrgmobile.data.local.dao.JobDao
-import com.slachdevm.mrrgmobile.data.local.entity.JobEntity
 import com.slachdevm.mrrgmobile.data.local.dao.UserProfileDao
-import com.slachdevm.mrrgmobile.data.local.entity.UserProfileEntity
 import com.slachdevm.mrrgmobile.data.local.dao.PendingSyncDao
+import com.slachdevm.mrrgmobile.data.local.entity.JobEntity
+import com.slachdevm.mrrgmobile.data.local.entity.UserProfileEntity
 import com.slachdevm.mrrgmobile.data.local.entity.PendingSyncEntity
 
 @Database(

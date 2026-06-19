@@ -3,12 +3,13 @@ package com.slachdevm.mrrgmobile.data.repository
 import com.slachdevm.mrrgmobile.data.session.SessionManager
 import com.slachdevm.mrrgmobile.data.api.AuthApi
 import com.slachdevm.mrrgmobile.data.api.RetrofitClient
+import com.slachdevm.mrrgmobile.data.api.UserApi
 import com.slachdevm.mrrgmobile.data.dto.LoginRequestDto
 import com.slachdevm.mrrgmobile.data.dto.LoginResponseDto
-import com.slachdevm.mrrgmobile.data.model.FcmTokenRequest
-import com.slachdevm.mrrgmobile.data.api.UserApi
 import com.slachdevm.mrrgmobile.data.dto.ActivateAccountRequestDto
+import com.slachdevm.mrrgmobile.data.model.FcmTokenRequest
 import com.slachdevm.mrrgmobile.domain.model.UserRole
+import retrofit2.Response
 
 class AuthRepository(
     private val authApi: AuthApi,
@@ -77,10 +78,23 @@ class AuthRepository(
             if (response.isSuccessful) {
                 Result.success(Unit)
             } else {
-                Result.failure(Exception("Account activation failed"))
+                Result.failure(Exception(extractErrorMessage(response)))
             }
         } catch (exception: Exception) {
             Result.failure(exception)
+        }
+    }
+
+    private fun extractErrorMessage(response: Response<*>): String {
+        val fallbackMessage = "Account activation failed"
+
+        return try {
+            response.errorBody()
+                ?.string()
+                ?.takeIf { it.isNotBlank() }
+                ?: fallbackMessage
+        } catch (exception: Exception) {
+            fallbackMessage
         }
     }
 

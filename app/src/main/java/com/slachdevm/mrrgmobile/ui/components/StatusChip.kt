@@ -6,9 +6,9 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import com.slachdevm.mrrgmobile.domain.model.JobStatus
-import androidx.compose.runtime.getValue
 
 @Composable
 fun StatusChip(status: JobStatus) {
