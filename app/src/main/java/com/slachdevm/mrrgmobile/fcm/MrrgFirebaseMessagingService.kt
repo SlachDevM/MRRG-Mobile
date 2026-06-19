@@ -3,14 +3,16 @@ package com.slachdevm.mrrgmobile.fcm
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.slachdevm.mrrgmobile.BuildConfig
 
 class MrrgFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
 
-        Log.d(TAG, "New FCM token: $token")
-
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "New FCM token: $token")
+        }
         // Étape suivante :
         // envoyer ce token au backend pour l'associer au worker connecté.
     }
@@ -18,13 +20,17 @@ class MrrgFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
-        Log.d(TAG, "FCM message received")
-        Log.d(TAG, "From: ${message.from}")
-        Log.d(TAG, "Data: ${message.data}")
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "FCM message received")
+            Log.d(TAG, "From: ${message.from}")
+            Log.d(TAG, "Data: ${message.data}")
+        }
 
         message.notification?.let { notification ->
-            Log.d(TAG, "Notification title: ${notification.title}")
-            Log.d(TAG, "Notification body: ${notification.body}")
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "Notification title: ${notification.title}")
+                Log.d(TAG, "Notification body: ${notification.body}")
+            }
         }
 
         val title = message.notification?.title

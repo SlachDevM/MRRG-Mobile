@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -32,9 +33,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.slachdevm.mrrgmobile.R
 
 @Composable
 fun PhotoSection(
@@ -53,7 +56,7 @@ fun PhotoSection(
 
         if (photos.isEmpty()) {
             Text(
-                text = "No photos added",
+                text = stringResource(R.string.no_photos_added),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.outline
             )
@@ -98,7 +101,7 @@ private fun PhotoSectionHeader(
             fontWeight = FontWeight.Bold
         )
         IconButton(onClick = onAddPhoto) {
-            Icon(Icons.Default.AddAPhoto, contentDescription = "Add Photo")
+            Icon(Icons.Default.AddAPhoto, contentDescription = stringResource(R.string.action_add_photo))
         }
     }
 }
@@ -134,7 +137,7 @@ private fun PhotoThumbnail(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Image unavailable")
+                    Text(stringResource(R.string.image_unavailable))
                 }
             }
         }
@@ -147,7 +150,7 @@ private fun PhotoThumbnail(
         ) {
             Icon(
                 imageVector = Icons.Default.Close,
-                contentDescription = "Delete photo",
+                contentDescription = stringResource(R.string.action_delete_photo),
                 tint = MaterialTheme.colorScheme.error
             )
         }
@@ -188,7 +191,7 @@ private fun FullscreenPhotoDialog(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Image unavailable")
+                    Text(stringResource(R.string.image_unavailable))
                 }
             }
         }

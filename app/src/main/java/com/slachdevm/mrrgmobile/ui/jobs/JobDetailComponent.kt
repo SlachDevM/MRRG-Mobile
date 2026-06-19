@@ -1,6 +1,7 @@
 package com.slachdevm.mrrgmobile.ui.jobs
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,13 +19,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.slachdevm.mrrgmobile.R
+import com.slachdevm.mrrgmobile.domain.model.Job
 import com.slachdevm.mrrgmobile.domain.model.JobStatus
 import com.slachdevm.mrrgmobile.ui.components.StatusChip
 import com.slachdevm.mrrgmobile.ui.components.toJobTypeLabel
 import com.slachdevm.mrrgmobile.ui.components.toPriorityLabel
-import com.slachdevm.mrrgmobile.domain.model.Job
 
 @Composable
 fun JobInfoSection(
@@ -35,7 +38,7 @@ fun JobInfoSection(
     Text(text = job.clientName, style = MaterialTheme.typography.headlineMedium)
     Text(text = job.clientAddress, style = MaterialTheme.typography.bodyLarge)
     TextButton(onClick = { onStartNavigation(job.clientAddress) }) {
-        Text("Start navigation")
+        Text(stringResource(R.string.action_start_navigation))
     }
     Text(
         text = job.clientPhone,
@@ -43,15 +46,15 @@ fun JobInfoSection(
         color = MaterialTheme.colorScheme.primary
     )
     TextButton(onClick = { onCallClient(job.clientPhone) }) {
-        Text("Call client")
+        Text(stringResource(R.string.action_call_client))
     }
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    DetailItem(label = "Type", value = job.jobTypes.toJobTypeLabel())
+    DetailItem(label = stringResource(R.string.label_type), value = job.jobTypes.toJobTypeLabel())
     StatusChip(status = job.status)
-    DetailItem(label = "Priority", value = job.priorityLevel.toPriorityLabel())
-    DetailItem(label = "Details", value = job.details ?: "No extra details")
+    DetailItem(label = stringResource(R.string.label_priority), value = job.priorityLevel.toPriorityLabel())
+    DetailItem(label = stringResource(R.string.label_details), value = job.details ?: stringResource(R.string.no_extra_details))
 }
 
 @Composable
@@ -63,7 +66,7 @@ fun NotesSection(
 ) {
     Column {
         Text(
-            text = "Notes",
+            text = stringResource(R.string.label_notes),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
@@ -73,7 +76,7 @@ fun NotesSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp),
-            placeholder = { Text("Add notes here...") }
+            placeholder = { Text(stringResource(R.string.placeholder_add_notes)) }
         )
         Button(
             onClick = onSaveNotes,
@@ -82,7 +85,7 @@ fun NotesSection(
                 .padding(top = 8.dp),
             enabled = !isUpdating
         ) {
-            Text("Save Notes")
+            Text(stringResource(R.string.action_save_notes))
         }
     }
 }
@@ -113,9 +116,9 @@ fun CompleteJobButton(
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             if (status == JobStatus.READY_FOR_CONFIRMATION)
-                "Waiting for confirmation"
+                stringResource(R.string.status_waiting_confirmation)
             else
-                "Complete"
+                stringResource(R.string.action_complete)
         )
     }
 

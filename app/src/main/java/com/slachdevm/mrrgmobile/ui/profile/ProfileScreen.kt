@@ -20,7 +20,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.slachdevm.mrrgmobile.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,7 +34,7 @@ fun ProfileScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Profile") },
+                title = { Text(stringResource(R.string.profile_title)) },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors()
             )
         }
@@ -60,7 +62,7 @@ fun ProfileScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = uiState.errorMessage ?: "Failed to load profile",
+                        text = uiState.errorMessage ?: stringResource(R.string.error_failed_load_profile),
                         color = MaterialTheme.colorScheme.error
                     )
                 }

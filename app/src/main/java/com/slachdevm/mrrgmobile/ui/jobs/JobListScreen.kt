@@ -11,6 +11,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,24 +51,25 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.slachdevm.mrrgmobile.R
 import com.slachdevm.mrrgmobile.domain.model.Job
 import com.slachdevm.mrrgmobile.domain.model.UserRole
+import com.slachdevm.mrrgmobile.ui.components.OfflineIndicator
 import com.slachdevm.mrrgmobile.ui.components.toJobTypeLabel
 import com.slachdevm.mrrgmobile.ui.components.toLabel
 import com.slachdevm.mrrgmobile.ui.components.toPriorityLabel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import com.slachdevm.mrrgmobile.ui.components.OfflineIndicator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,162 +83,33 @@ fun JobListScreen(
     onLogout: () -> Unit,
 ) {
     val state = viewModel.uiState
-    val hour = java.time.LocalTime.now().hour
-
-    val badgeScale by animateFloatAsState(
-        targetValue = if (notificationUnreadCount > 0) 1f else 0f,
-        animationSpec = tween(180),
-        label = "NotificationBadgeScaleAnimation"
-    )
-
-    val greeting = when (hour) {
-        in 5..11 -> "Good morning"
-        in 12..17 -> "Good afternoon"
-        else -> "Good evening"
-    }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = "👋 $greeting",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.outline
-                        )
-
-                        Text(
-                            text = state.userName ?: "Worker",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Text(
-                            text = state.userRole?.displayName ?: "",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.outline
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                    }
-                },
-                actions = {
-                    Column(
-                        horizontalAlignment = Alignment.End
-                    ) {
-                        if (state.isOfflineData) {
-                            OfflineIndicator(
-                                modifier = Modifier.padding(end = 8.dp)
-                            )
-                        }
-
-                        Row {
-                            IconButton(
-                                onClick = onProfileClick
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Person,
-                                    contentDescription = "Profile"
-                                )
-                            }
-
-                            BadgedBox(
-                                badge = {
-                                    if (notificationUnreadCount > 0) {
-                                        Badge(
-                                            modifier = Modifier.graphicsLayer {
-                                                scaleX = badgeScale
-                                                scaleY = badgeScale
-                                            }
-                                        ) {
-                                            Text(notificationUnreadCount.toString())
-                                        }
-                                    }
-                                }
-                            ) {
-                                IconButton(
-                                    onClick = onNotificationsClick
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Notifications,
-                                        contentDescription = "Notifications"
-                                    )
-                                }
-                            }
-
-                            IconButton(onClick = { viewModel.toggleViewMode() }) {
-                                Icon(
-                                    imageVector = if (state.viewMode == ViewMode.DAY_3)
-                                        Icons.Default.CalendarMonth
-                                    else
-                                        Icons.Default.CalendarViewDay,
-                                    contentDescription = "Toggle View Mode"
-                                )
-                            }
-
-                            IconButton(onClick = onSettingsClick) {
-                                Icon(
-                                    imageVector = Icons.Default.Settings,
-                                    contentDescription = "Settings"
-                                )
-                            }
-
-                            IconButton(onClick = {
-                                viewModel.logout()
-                                onLogout()
-                            }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.Logout,
-                                    contentDescription = "Logout"
-                                )
-                            }
-                        }
-                    }
+            DashboardTopBar(
+                userName = state.userName,
+                userRole = state.userRole,
+                isOfflineData = state.isOfflineData,
+                viewMode = state.viewMode,
+                notificationUnreadCount = notificationUnreadCount,
+                onProfileClick = onProfileClick,
+                onNotificationsClick = onNotificationsClick,
+                onToggleViewMode = viewModel::toggleViewMode,
+                onSettingsClick = onSettingsClick,
+                onLogout = {
+                    viewModel.logout()
+                    onLogout()
                 }
             )
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
-            // Date Navigation Header
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { viewModel.previousDateRange() }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous")
-                }
-
-                val endDate =
-                    state.selectedDate.plusDays(if (state.viewMode == ViewMode.DAY_3) 2 else 6)
-                AnimatedContent(
-                    targetState = state.selectedDate to endDate,
-                    transitionSpec = {
-                        fadeIn(animationSpec = tween(220)) + slideInHorizontally(
-                            animationSpec = tween(220),
-                            initialOffsetX = { it / 4 }
-                        ) togetherWith fadeOut(animationSpec = tween(120)) + slideOutHorizontally(
-                            animationSpec = tween(120),
-                            targetOffsetX = { -it / 4 }
-                        ) using SizeTransform(clip = false)
-                    },
-                    label = "DateRangeAnimation"
-                ) { (startDate, endDate) ->
-                    Text(
-                        text = "${startDate.format(DateTimeFormatter.ofPattern("MMM dd"))} - ${
-                            endDate.format(DateTimeFormatter.ofPattern("MMM dd"))
-                        }",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                IconButton(onClick = { viewModel.nextDateRange() }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next")
-                }
-            }
+            DateRangeSelector(
+                selectedDate = state.selectedDate,
+                viewMode = state.viewMode,
+                onPreviousClick = viewModel::previousDateRange,
+                onNextClick = viewModel::nextDateRange
+            )
 
             val swipeRefreshState = rememberSwipeRefreshState(
                 isRefreshing = state.isLoading
@@ -248,8 +121,6 @@ fun JobListScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 val hasJobs = state.jobsByDate.values.any { it.isNotEmpty() }
-                val daysToShow = if (state.viewMode == ViewMode.DAY_3) 3 else 7
-
                 val dashboardContentState = when {
                     state.isLoading && state.jobsByDate.isEmpty() -> "loading"
                     state.error != null && state.jobsByDate.isEmpty() -> "error"
@@ -262,97 +133,17 @@ fun JobListScreen(
                     label = "DashboardContentAnimation"
                 ) { contentState ->
                     when (contentState) {
-                        "loading" -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
-
-                        "error" -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = state.error ?: "Something went wrong",
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
-
-                        "empty" -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                                            alpha = 0.6f
-                                        )
-                                    )
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(16.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.CalendarMonth,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(32.dp),
-                                            tint = MaterialTheme.colorScheme.outline
-                                        )
-
-                                        Spacer(modifier = Modifier.width(12.dp))
-
-                                        Column {
-                                            Text(
-                                                text = "No jobs scheduled",
-                                                style = MaterialTheme.typography.titleSmall
-                                            )
-
-                                            Text(
-                                                text = "No work planned for this period.",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.outline
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        else -> {
-                            LazyColumn(
-                                modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp)
-                            ) {
-                                items(
-                                    count = daysToShow,
-                                    key = { index ->
-                                        state.selectedDate.plusDays(index.toLong())
-                                    }
-                                ) { index ->
-                                    val date = state.selectedDate.plusDays(index.toLong())
-                                    val jobsForDate = state.jobsByDate[date] ?: emptyList()
-
-                                    DaySection(
-                                        modifier = Modifier.animateItem(),
-                                        date = date,
-                                        jobs = jobsForDate,
-                                        currentUserName = state.userName ?: "",
-                                        currentUserRole = state.userRole,
-                                        onJobClick = onJobClick
-                                    )
-                                }
-                            }
-                        }
+                        "loading" -> LoadingContent()
+                        "error" -> ErrorContent(state.error)
+                        "empty" -> EmptyJobsContent()
+                        else -> JobListContent(
+                            selectedDate = state.selectedDate,
+                            viewMode = state.viewMode,
+                            jobsByDate = state.jobsByDate,
+                            userName = state.userName ?: "",
+                            userRole = state.userRole,
+                            onJobClick = onJobClick
+                        )
                     }
                 }
             }
@@ -360,8 +151,310 @@ fun JobListScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DaySection(
+private fun DashboardTopBar(
+    userName: String?,
+    userRole: UserRole?,
+    isOfflineData: Boolean,
+    viewMode: ViewMode,
+    notificationUnreadCount: Long,
+    onProfileClick: () -> Unit,
+    onNotificationsClick: () -> Unit,
+    onToggleViewMode: () -> Unit,
+    onSettingsClick: () -> Unit,
+    onLogout: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            DashboardHeader(
+                userName = userName,
+                userRole = userRole
+            )
+        },
+        actions = {
+            DashboardActions(
+                isOfflineData = isOfflineData,
+                viewMode = viewMode,
+                notificationUnreadCount = notificationUnreadCount,
+                onProfileClick = onProfileClick,
+                onNotificationsClick = onNotificationsClick,
+                onToggleViewMode = onToggleViewMode,
+                onSettingsClick = onSettingsClick,
+                onLogout = onLogout
+            )
+        }
+    )
+}
+
+@Composable
+private fun DashboardHeader(
+    userName: String?,
+    userRole: UserRole?
+) {
+    val hour = java.time.LocalTime.now().hour
+    val greeting = when (hour) {
+        in 5..11 -> stringResource(R.string.greeting_morning)
+        in 12..17 -> stringResource(R.string.greeting_afternoon)
+        else -> stringResource(R.string.greeting_evening)
+    }
+
+    Column {
+        Text(
+            text = "👋 $greeting",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.outline
+        )
+
+        Text(
+            text = userName ?: stringResource(R.string.default_worker_name),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            text = userRole?.displayName ?: "",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.outline
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+    }
+}
+
+@Composable
+private fun DashboardActions(
+    isOfflineData: Boolean,
+    viewMode: ViewMode,
+    notificationUnreadCount: Long,
+    onProfileClick: () -> Unit,
+    onNotificationsClick: () -> Unit,
+    onToggleViewMode: () -> Unit,
+    onSettingsClick: () -> Unit,
+    onLogout: () -> Unit
+) {
+    val badgeScale by animateFloatAsState(
+        targetValue = if (notificationUnreadCount > 0) 1f else 0f,
+        animationSpec = tween(180),
+        label = "NotificationBadgeScaleAnimation"
+    )
+
+    Column(horizontalAlignment = Alignment.End) {
+        if (isOfflineData) {
+            OfflineIndicator(modifier = Modifier.padding(end = 8.dp))
+        }
+
+        Row {
+            IconButton(onClick = onProfileClick) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = stringResource(R.string.action_profile)
+                )
+            }
+
+            BadgedBox(
+                badge = {
+                    if (notificationUnreadCount > 0) {
+                        Badge(
+                            modifier = Modifier.graphicsLayer {
+                                scaleX = badgeScale
+                                scaleY = badgeScale
+                            }
+                        ) {
+                            Text(notificationUnreadCount.toString())
+                        }
+                    }
+                }
+            ) {
+                IconButton(onClick = onNotificationsClick) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = stringResource(R.string.action_notifications)
+                    )
+                }
+            }
+
+            IconButton(onClick = onToggleViewMode) {
+                Icon(
+                    imageVector = if (viewMode == ViewMode.DAY_3)
+                        Icons.Default.CalendarMonth
+                    else
+                        Icons.Default.CalendarViewDay,
+                    contentDescription = stringResource(R.string.action_toggle_view_mode)
+                )
+            }
+
+            IconButton(onClick = onSettingsClick) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = stringResource(R.string.action_settings)
+                )
+            }
+
+            IconButton(onClick = onLogout) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Logout,
+                    contentDescription = stringResource(R.string.action_logout)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DateRangeSelector(
+    selectedDate: LocalDate,
+    viewMode: ViewMode,
+    onPreviousClick: () -> Unit,
+    onNextClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onPreviousClick) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(R.string.action_previous)
+            )
+        }
+
+        val endDate = selectedDate.plusDays(if (viewMode == ViewMode.DAY_3) 2 else 6)
+        AnimatedContent(
+            targetState = selectedDate to endDate,
+            transitionSpec = {
+                fadeIn(animationSpec = tween(220)) + slideInHorizontally(
+                    animationSpec = tween(220),
+                    initialOffsetX = { it / 4 }
+                ) togetherWith fadeOut(animationSpec = tween(120)) + slideOutHorizontally(
+                    animationSpec = tween(120),
+                    targetOffsetX = { -it / 4 }
+                ) using SizeTransform(clip = false)
+            },
+            label = "DateRangeAnimation"
+        ) { (start, end) ->
+            Text(
+                text = "${start.format(DateTimeFormatter.ofPattern("MMM dd"))} - ${
+                    end.format(DateTimeFormatter.ofPattern("MMM dd"))
+                }",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        IconButton(onClick = onNextClick) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = stringResource(R.string.action_next)
+            )
+        }
+    }
+}
+
+@Composable
+private fun LoadingContent() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun ErrorContent(error: String?) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = error ?: stringResource(R.string.error_something_went_wrong),
+            color = MaterialTheme.colorScheme.error
+        )
+    }
+}
+
+@Composable
+private fun EmptyJobsContent() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+            )
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CalendarMonth,
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                    tint = MaterialTheme.colorScheme.outline
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Text(
+                        text = stringResource(R.string.no_jobs_scheduled),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+
+                    Text(
+                        text = stringResource(R.string.no_work_planned_period),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun JobListContent(
+    selectedDate: LocalDate,
+    viewMode: ViewMode,
+    jobsByDate: Map<LocalDate, List<Job>>,
+    userName: String,
+    userRole: UserRole?,
+    onJobClick: (Long) -> Unit
+) {
+    val daysToShow = if (viewMode == ViewMode.DAY_3) 3 else 7
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp)
+    ) {
+        items(
+            count = daysToShow,
+            key = { index -> selectedDate.plusDays(index.toLong()) }
+        ) { index ->
+            val date = selectedDate.plusDays(index.toLong())
+            val jobsForDate = jobsByDate[date] ?: emptyList()
+
+            DaySection(
+                modifier = Modifier.animateItem(),
+                date = date,
+                jobs = jobsForDate,
+                currentUserName = userName,
+                currentUserRole = userRole,
+                onJobClick = onJobClick
+            )
+        }
+    }
+}
+
+@Composable
+private fun DaySection(
     modifier: Modifier = Modifier,
     date: LocalDate,
     jobs: List<Job>,
@@ -410,12 +503,12 @@ fun DaySection(
 
                     Column {
                         Text(
-                            text = "No jobs scheduled",
+                            text = stringResource(R.string.no_jobs_scheduled),
                             style = MaterialTheme.typography.titleSmall
                         )
 
                         Text(
-                            text = "No work planned today. Enjoy your day!",
+                            text = stringResource(R.string.no_work_planned_today),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.outline
                         )
@@ -440,7 +533,7 @@ fun DaySection(
 }
 
 @Composable
-fun JobItem(
+private fun JobItem(
     job: Job,
     canEdit: Boolean,
     onClick: () -> Unit
@@ -490,7 +583,7 @@ fun JobItem(
                 if (!canEdit) {
                     Icon(
                         imageVector = Icons.Default.Lock,
-                        contentDescription = "Not Assigned",
+                        contentDescription = stringResource(R.string.status_not_assigned),
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.outline
                     )
@@ -581,7 +674,7 @@ fun JobItem(
                     Spacer(modifier = Modifier.width(4.dp))
 
                     Text(
-                        text = job.assignedWorkers ?: "",
+                        text = job.assignedWorkers,
                         style = MaterialTheme.typography.bodySmall,
                         color = if (canEdit) {
                             MaterialTheme.colorScheme.onSurfaceVariant

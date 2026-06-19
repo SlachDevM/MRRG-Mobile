@@ -66,10 +66,10 @@ class NotificationHelper(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                CHANNEL_NAME,
+                context.getString(R.string.notif_channel_name),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = CHANNEL_DESCRIPTION
+                description = context.getString(R.string.notif_channel_desc)
             }
 
             val manager = context.getSystemService(NotificationManager::class.java)
@@ -79,8 +79,6 @@ class NotificationHelper(
 
     companion object {
         private const val CHANNEL_ID = "mrrg_notifications"
-        private const val CHANNEL_NAME = "MRRG Notifications"
-        private const val CHANNEL_DESCRIPTION = "Job updates and assignment notifications"
         const val EXTRA_JOB_ID = "extra_job_id"
     }
 }

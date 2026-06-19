@@ -1,3 +1,87 @@
 <resources>
     <string name="app_name">MRRG Mobile</string>
+    <string name="login_subtitle">Sign in to continue</string>
+    <string name="login_email_label">Email</string>
+    <string name="login_password_label">Password</string>
+    <string name="login_button">Login</string>
+    <string name="login_create_account">Create account</string>
+
+    <!-- JobListScreen -->
+    <string name="greeting_morning">Good morning</string>
+    <string name="greeting_afternoon">Good afternoon</string>
+    <string name="greeting_evening">Good evening</string>
+    <string name="default_worker_name">Worker</string>
+    <string name="action_profile">Profile</string>
+    <string name="action_notifications">Notifications</string>
+    <string name="action_toggle_view_mode">Toggle View Mode</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_logout">Logout</string>
+    <string name="action_previous">Previous</string>
+    <string name="action_next">Next</string>
+    <string name="error_something_went_wrong">Something went wrong</string>
+    <string name="no_jobs_scheduled">No jobs scheduled</string>
+    <string name="no_work_planned_period">No work planned for this period.</string>
+    <string name="no_work_planned_today">No work planned today. Enjoy your day!</string>
+    <string name="status_not_assigned">Not Assigned</string>
+
+    <!-- JobDetailScreen -->
+    <string name="job_details_title">Job Details</string>
+    <string name="action_back">Back</string>
+    <string name="before_photos">Before Photos</string>
+    <string name="after_photos">After Photos</string>
+    <string name="dialog_add_photo_title">Add photo</string>
+    <string name="dialog_add_photo_message">Choose a photo source</string>
+    <string name="action_camera">Camera</string>
+    <string name="action_gallery">Gallery</string>
+
+    <!-- JobDetailComponent -->
+    <string name="action_start_navigation">Start navigation</string>
+    <string name="action_call_client">Call client</string>
+    <string name="label_type">Type</string>
+    <string name="label_priority">Priority</string>
+    <string name="label_details">Details</string>
+    <string name="no_extra_details">No extra details</string>
+    <string name="label_notes">Notes</string>
+    <string name="placeholder_add_notes">Add notes here...</string>
+    <string name="action_save_notes">Save Notes</string>
+    <string name="status_waiting_confirmation">Waiting for confirmation</string>
+    <string name="action_complete">Complete</string>
+
+    <!-- PhotoSection -->
+    <string name="no_photos_added">No photos added</string>
+    <string name="action_add_photo">Add Photo</string>
+    <string name="image_unavailable">Image unavailable</string>
+    <string name="action_delete_photo">Delete photo</string>
+
+    <!-- OfflineIndicator -->
+    <string name="status_offline">Offline</string>
+
+    <!-- NotificationScreen -->
+    <string name="notifications_title">Notifications</string>
+    <string name="action_mark_all_read">Mark all as read</string>
+    <string name="label_unread">Unread</string>
+    <string name="no_notifications">No notifications</string>
+    <string name="all_caught_up">You\'re all caught up.</string>
+    <string name="notif_new_job_assigned">New job assigned</string>
+    <string name="notif_ready_for_confirmation">Ready for confirmation</string>
+    <string name="notif_job_confirmed">Job confirmed</string>
+    <string name="notif_generic_title">Notification</string>
+
+    <!-- ProfileScreen -->
+    <string name="profile_title">Profile</string>
+    <string name="error_failed_load_profile">Failed to load profile</string>
+
+    <!-- SettingsScreen -->
+    <string name="settings_title">Settings</string>
+    <string name="push_notifications">Push notifications</string>
+    <string name="push_notifications_desc">Enabled for job updates</string>
+    <string name="label_theme">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="label_app_version">App version</string>
+
+    <!-- NotificationHelper -->
+    <string name="notif_channel_name">MRRG Notifications</string>
+    <string name="notif_channel_desc">Job updates and assignment notifications</string>
 </resources>

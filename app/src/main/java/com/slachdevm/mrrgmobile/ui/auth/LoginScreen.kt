@@ -21,6 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.slachdevm.mrrgmobile.R
 
 @Composable
 fun LoginScreen(
@@ -43,14 +45,14 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "MRRG Mobile",
+            text = stringResource(R.string.app_name),
             style = MaterialTheme.typography.headlineMedium
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Sign in to continue",
+            text = stringResource(R.string.login_subtitle),
             style = MaterialTheme.typography.bodyMedium
         )
 
@@ -59,7 +61,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = uiState.email,
             onValueChange = viewModel::onEmailChange,
-            label = { Text("Email") },
+            label = { Text(stringResource(R.string.login_email_label)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -69,7 +71,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = uiState.password,
             onValueChange = viewModel::onPasswordChange,
-            label = { Text("Password") },
+            label = { Text(stringResource(R.string.login_password_label)) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
@@ -95,7 +97,7 @@ fun LoginScreen(
             if (uiState.isLoading) {
                 CircularProgressIndicator()
             } else {
-                Text("Login")
+                Text(stringResource(R.string.login_button))
             }
         }
 
@@ -106,7 +108,7 @@ fun LoginScreen(
                 // Register screen will be added later if needed
             }
         ) {
-            Text("Create account")
+            Text(stringResource(R.string.login_create_account))
         }
     }
 }

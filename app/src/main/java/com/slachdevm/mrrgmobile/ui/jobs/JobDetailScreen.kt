@@ -37,9 +37,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.slachdevm.mrrgmobile.R
 import java.io.ByteArrayOutputStream
 import java.io.File
 
@@ -184,10 +186,10 @@ fun JobDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Job Details") },
+                title = { Text(stringResource(R.string.job_details_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 }
             )
@@ -215,7 +217,7 @@ fun JobDetailScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 PhotoSection(
-                    title = "Before Photos",
+                    title = stringResource(R.string.before_photos),
                     photos = job.beforePhotos,
                     onAddPhoto = {
                         selectedPhotoType = "before"
@@ -227,7 +229,7 @@ fun JobDetailScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 PhotoSection(
-                    title = "After Photos",
+                    title = stringResource(R.string.after_photos),
                     photos = job.afterPhotos,
                     onAddPhoto = {
                         selectedPhotoType = "after"
@@ -259,8 +261,8 @@ fun JobDetailScreen(
         if (showPhotoSourceDialog) {
             AlertDialog(
                 onDismissRequest = { showPhotoSourceDialog = false },
-                title = { Text("Add photo") },
-                text = { Text("Choose a photo source") },
+                title = { Text(stringResource(R.string.dialog_add_photo_title)) },
+                text = { Text(stringResource(R.string.dialog_add_photo_message)) },
                 confirmButton = {
                     TextButton(
                         onClick = {
@@ -281,7 +283,7 @@ fun JobDetailScreen(
                             }
                         }
                     ) {
-                        Text("Camera")
+                        Text(stringResource(R.string.action_camera))
                     }
                 },
                 dismissButton = {
@@ -291,7 +293,7 @@ fun JobDetailScreen(
                             imagePickerLauncher.launch("image/*")
                         }
                     ) {
-                        Text("Gallery")
+                        Text(stringResource(R.string.action_gallery))
                     }
                 }
             )

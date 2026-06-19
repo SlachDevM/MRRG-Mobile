@@ -42,10 +42,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.slachdevm.mrrgmobile.R
 import com.slachdevm.mrrgmobile.domain.constants.JOB_ASSIGNED
 import com.slachdevm.mrrgmobile.domain.constants.JOB_CONFIRMED
 import com.slachdevm.mrrgmobile.domain.constants.JOB_READY_FOR_CONFIRMATION
@@ -71,12 +73,12 @@ fun NotificationScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Notifications") },
+                title = { Text(stringResource(R.string.notifications_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.action_back)
                         )
                     }
                 },
@@ -89,7 +91,7 @@ fun NotificationScreen(
                         IconButton(onClick = { viewModel.markAllAsRead() }) {
                             Icon(
                                 imageVector = Icons.Default.MarkEmailRead,
-                                contentDescription = "Mark all as read"
+                                contentDescription = stringResource(R.string.action_mark_all_read)
                             )
                         }
                     }
@@ -205,7 +207,7 @@ fun NotificationItem(
                             onClick = {},
                             enabled = false,
                             label = {
-                                Text("Unread")
+                                Text(stringResource(R.string.label_unread))
                             }
                         )
 
@@ -257,12 +259,12 @@ fun EmptyNotifications() {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "No notifications",
+                text = stringResource(R.string.no_notifications),
                 style = MaterialTheme.typography.titleMedium
             )
 
             Text(
-                text = "You're all caught up.",
+                text = stringResource(R.string.all_caught_up),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.outline
             )
@@ -285,10 +287,11 @@ private fun notificationIcon(type: String): ImageVector =
         else -> Icons.Default.Notifications
     }
 
+@Composable
 private fun notificationTitle(type: String): String =
     when (type) {
-        JOB_ASSIGNED -> "New job assigned"
-        JOB_READY_FOR_CONFIRMATION -> "Ready for confirmation"
-        JOB_CONFIRMED -> "Job confirmed"
-        else -> "Notification"
+        JOB_ASSIGNED -> stringResource(R.string.notif_new_job_assigned)
+        JOB_READY_FOR_CONFIRMATION -> stringResource(R.string.notif_ready_for_confirmation)
+        JOB_CONFIRMED -> stringResource(R.string.notif_job_confirmed)
+        else -> stringResource(R.string.notif_generic_title)
     }
