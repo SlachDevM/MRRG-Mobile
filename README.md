@@ -64,12 +64,46 @@ Both the Android application and the React web application share the same Spring
 - Job management
 - Before and after photo capture
 - Offline Room cache
-- Offline synchronization with retry support
+- Offline synchronization with retry and queue coalescing
 - Material Motion animations
 - Firebase push notifications
 - Material 3 dynamic theming
 - Profile management
 - Settings
+
+---
+
+## Account Activation
+
+MRRG-Mobile supports account activation through Android deep links.
+
+Users are created by administrators from the React web application and receive an activation email.
+
+```text
+Admin (React)
+      │
+      ▼
+Create User
+      │
+      ▼
+Activation Email
+      │
+      ▼
+mrrg://activate-account?token=...
+      │
+      ▼
+MRRG-Mobile
+      │
+      ▼
+Choose Password
+      │
+      ▼
+Account Activated
+      │
+      ▼
+    Login
+```
+The activation token is validated by the backend. Android only handles the user interface and forwards the activation request.
 
 ---
 
@@ -158,18 +192,6 @@ Current implementation includes:
 - Failed synchronization tracking
 - Queue coalescing
 - Manual synchronization
-
----
-
-## Account Activation
-
-The application supports secure account activation through Android deep links.
-
-New users are created by administrators through the React web application.
-
-Users receive an activation email containing a secure deep link.
-
-After choosing a password, the backend activates the account and the user can authenticate normally.
 
 ---
 
