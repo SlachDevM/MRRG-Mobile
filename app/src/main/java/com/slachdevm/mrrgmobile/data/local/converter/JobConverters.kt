@@ -3,6 +3,7 @@ package com.slachdevm.mrrgmobile.data.local.converter
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.slachdevm.mrrgmobile.data.local.entity.PendingSyncType
 import com.slachdevm.mrrgmobile.domain.model.JobStatus
 
 class JobConverters {
@@ -27,4 +28,11 @@ class JobConverters {
             gson.fromJson<List<String>>(value, type)
         }.getOrDefault(emptyList())
     }
+
+    @TypeConverter
+    fun fromPendingSyncType(type: PendingSyncType): String = type.name
+
+    @TypeConverter
+    fun toPendingSyncType(value: String): PendingSyncType =
+        runCatching { PendingSyncType.valueOf(value) }.getOrDefault(PendingSyncType.UPDATE_JOB)
 }

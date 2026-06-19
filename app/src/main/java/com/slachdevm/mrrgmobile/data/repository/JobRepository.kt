@@ -1,7 +1,11 @@
 package com.slachdevm.mrrgmobile.data.repository
 
+import com.google.gson.Gson
 import com.slachdevm.mrrgmobile.data.api.JobApi
 import com.slachdevm.mrrgmobile.data.local.dao.JobDao
+import com.slachdevm.mrrgmobile.data.local.dao.PendingSyncDao
+import com.slachdevm.mrrgmobile.data.local.entity.PendingSyncEntity
+import com.slachdevm.mrrgmobile.data.local.entity.PendingSyncType
 import com.slachdevm.mrrgmobile.domain.model.Job
 import com.slachdevm.mrrgmobile.data.local.mapper.toDomain
 import com.slachdevm.mrrgmobile.data.local.mapper.toEntity
@@ -9,8 +13,11 @@ import com.slachdevm.mrrgmobile.data.model.DataSourceResult
 
 class JobRepository(
     private val jobApi: JobApi,
-    private val jobDao: JobDao
+    private val jobDao: JobDao,
+    private val pendingSyncDao: PendingSyncDao
 ) {
+
+    private val gson = Gson()
 
     suspend fun getScheduledJobs(
         weekStart: Long,
@@ -112,13 +119,40 @@ class JobRepository(
     suspend fun updateJob(id: Long, job: Job): Result<Job> {
         return try {
             val response = jobApi.updateJob(id, job)
+
             if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
+                val updatedJob = response.body()!!
+
+                updatedJob.toEntity()?.let { jobDao.upsertJob(it) }
+
+                Result.success(updatedJob)
             } else {
                 Result.failure(Exception("Failed to update job: ${response.code()}"))
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            val localJob = job.copy(id = id)
+
+            localJob.toEntity()?.let { jobDao.upsertJob(it) }
+
+            val existingPendingItem = pendingSyncDao.getPendingItemByTypeAndEntityId(
+                type = PendingSyncType.UPDATE_JOB,
+                entityId = id
+            )
+
+            pendingSyncDao.upsertPendingItem(
+                existingPendingItem?.copy(
+                    payload = gson.toJson(localJob),
+                    retryCount = 0,
+                    lastError = null,
+                    createdAt = System.currentTimeMillis()
+                ) ?: PendingSyncEntity(
+                    type = PendingSyncType.UPDATE_JOB,
+                    entityId = id,
+                    payload = gson.toJson(localJob)
+                )
+            )
+
+            Result.success(localJob)
         }
     }
 }

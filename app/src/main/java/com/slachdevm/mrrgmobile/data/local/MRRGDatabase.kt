@@ -10,13 +10,16 @@ import com.slachdevm.mrrgmobile.data.local.dao.JobDao
 import com.slachdevm.mrrgmobile.data.local.entity.JobEntity
 import com.slachdevm.mrrgmobile.data.local.dao.UserProfileDao
 import com.slachdevm.mrrgmobile.data.local.entity.UserProfileEntity
+import com.slachdevm.mrrgmobile.data.local.dao.PendingSyncDao
+import com.slachdevm.mrrgmobile.data.local.entity.PendingSyncEntity
 
 @Database(
     entities = [
         JobEntity::class,
-        UserProfileEntity::class
+        UserProfileEntity::class,
+        PendingSyncEntity::class
     ],
-    version = 2,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(JobConverters::class)
@@ -25,6 +28,8 @@ abstract class MRRGDatabase : RoomDatabase() {
     abstract fun jobDao(): JobDao
 
     abstract fun userProfileDao(): UserProfileDao
+
+    abstract fun pendingSyncDao(): PendingSyncDao
 
     companion object {
         @Volatile

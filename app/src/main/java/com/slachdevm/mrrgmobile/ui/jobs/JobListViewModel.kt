@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slachdevm.mrrgmobile.data.repository.AuthRepository
 import com.slachdevm.mrrgmobile.data.repository.JobRepository
+import com.slachdevm.mrrgmobile.data.sync.SyncRepository
 import com.slachdevm.mrrgmobile.domain.model.Job
 import com.slachdevm.mrrgmobile.domain.model.UserRole
 import com.slachdevm.mrrgmobile.ui.components.snackbar.AppSnackbarManager
@@ -34,7 +35,8 @@ data class JobListUiState(
 
 class JobListViewModel(
     private val jobRepository: JobRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val syncRepository: SyncRepository
 ) : ViewModel() {
 
     var uiState by mutableStateOf(JobListUiState())
@@ -58,6 +60,10 @@ class JobListViewModel(
             val startMillis = start.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
             val endMillis = end.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
+            syncRepository.synchronize()
+                .onFailure {
+                    // Pending items stay queued.
+                }
             val result = jobRepository.getScheduledJobs(startMillis, endMillis)
             
             uiState = if (result.isSuccess) {

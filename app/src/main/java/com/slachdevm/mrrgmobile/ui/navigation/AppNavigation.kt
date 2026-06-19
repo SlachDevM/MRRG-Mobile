@@ -21,11 +21,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.slachdevm.mrrgmobile.data.session.SessionManager
 import com.slachdevm.mrrgmobile.data.api.RetrofitClient
-import com.slachdevm.mrrgmobile.data.api.UserApi
 import com.slachdevm.mrrgmobile.data.repository.AuthRepository
 import com.slachdevm.mrrgmobile.data.repository.JobRepository
 import com.slachdevm.mrrgmobile.data.repository.NotificationRepository
 import com.slachdevm.mrrgmobile.data.repository.ProfileRepository
+import com.slachdevm.mrrgmobile.data.local.MRRGDatabase
+import com.slachdevm.mrrgmobile.data.sync.SyncRepository
 import com.slachdevm.mrrgmobile.ui.auth.LoginScreen
 import com.slachdevm.mrrgmobile.ui.auth.LoginViewModel
 import com.slachdevm.mrrgmobile.ui.jobs.JobDetailScreen
@@ -38,8 +39,6 @@ import com.slachdevm.mrrgmobile.ui.profile.ProfileScreen
 import com.slachdevm.mrrgmobile.ui.profile.ProfileViewModel
 import com.slachdevm.mrrgmobile.ui.settings.SettingsScreen
 import com.slachdevm.mrrgmobile.ui.theme.ThemeMode
-import com.slachdevm.mrrgmobile.data.local.MRRGDatabase
-import com.slachdevm.mrrgmobile.data.local.dao.UserProfileDao
 
 object Routes {
     const val LOGIN = "login"
@@ -76,16 +75,31 @@ fun AppNavigation(
         RetrofitClient.createUserApi()
     }
     val sessionManager = remember { SessionManager(context) }
-    val authRepository = remember { AuthRepository(RetrofitClient.authApi, userApi, sessionManager) }
+    val authRepository = remember {
+        AuthRepository(
+            RetrofitClient.authApi,
+            userApi,
+            sessionManager
+        )
+    }
     val jobRepository = remember {
         JobRepository(
             jobApi = RetrofitClient.jobApi,
-            jobDao = database.jobDao()
+            jobDao = database.jobDao(),
+            pendingSyncDao = database.pendingSyncDao()
         )
     }
     val notificationRepository = remember {
         NotificationRepository(RetrofitClient.notificationApi)
     }
+    val syncRepository = remember {
+        SyncRepository(
+            jobApi = RetrofitClient.jobApi,
+            jobDao = database.jobDao(),
+            pendingSyncDao = database.pendingSyncDao()
+        )
+    }
+
     val notificationViewModel: NotificationViewModel = viewModel(
         factory = viewModelFactory {
             initializer {
@@ -147,7 +161,7 @@ fun AppNavigation(
             val jobListViewModel: JobListViewModel = viewModel(
                 factory = viewModelFactory {
                     initializer {
-                        JobListViewModel(jobRepository, authRepository)
+                        JobListViewModel(jobRepository, authRepository, syncRepository)
                     }
                 }
             )
@@ -196,7 +210,7 @@ fun AppNavigation(
             route = Routes.JOB_DETAIL,
             arguments = listOf(navArgument(Routes.JOB_ID_ARG) { type = NavType.LongType })
         ) { backStackEntry ->
-            val jobId = backStackEntry.arguments?.getLong(Routes.JOB_ID_ARG ) ?: return@composable
+            val jobId = backStackEntry.arguments?.getLong(Routes.JOB_ID_ARG) ?: return@composable
             val jobDetailViewModel: JobDetailViewModel = viewModel(
                 factory = viewModelFactory {
                     initializer {
