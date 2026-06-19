@@ -7,6 +7,7 @@ import com.slachdevm.mrrgmobile.data.dto.LoginRequestDto
 import com.slachdevm.mrrgmobile.data.dto.LoginResponseDto
 import com.slachdevm.mrrgmobile.data.model.FcmTokenRequest
 import com.slachdevm.mrrgmobile.data.api.UserApi
+import com.slachdevm.mrrgmobile.data.dto.ActivateAccountRequestDto
 import com.slachdevm.mrrgmobile.domain.model.UserRole
 
 class AuthRepository(
@@ -58,6 +59,28 @@ class AuthRepository(
             }
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    suspend fun activateAccount(
+        token: String,
+        password: String
+    ): Result<Unit> {
+        return try {
+            val response = authApi.activateAccount(
+                ActivateAccountRequestDto(
+                    token = token,
+                    password = password
+                )
+            )
+
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Account activation failed"))
+            }
+        } catch (exception: Exception) {
+            Result.failure(exception)
         }
     }
 

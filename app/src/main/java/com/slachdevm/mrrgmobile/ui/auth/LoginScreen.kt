@@ -27,6 +27,7 @@ import com.slachdevm.mrrgmobile.R
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
+    onActivateAccountClick: () -> Unit,
     viewModel: LoginViewModel
 ) {
     val uiState by viewModel.uiStateFlow.collectAsState()
@@ -104,9 +105,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         TextButton(
-            onClick = {
-                // TODO: Navigate to Account Activation screen once implemented
-            }
+            onClick = onActivateAccountClick
         ) {
             Text(stringResource(R.string.login_activate_account))
         }

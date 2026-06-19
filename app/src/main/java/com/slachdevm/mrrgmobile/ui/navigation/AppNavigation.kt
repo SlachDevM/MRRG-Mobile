@@ -30,6 +30,8 @@ import com.slachdevm.mrrgmobile.data.repository.NotificationRepository
 import com.slachdevm.mrrgmobile.data.repository.ProfileRepository
 import com.slachdevm.mrrgmobile.data.local.MRRGDatabase
 import com.slachdevm.mrrgmobile.data.sync.SyncRepository
+import com.slachdevm.mrrgmobile.ui.auth.ActivateAccountScreen
+import com.slachdevm.mrrgmobile.ui.auth.ActivateAccountViewModel
 import com.slachdevm.mrrgmobile.ui.auth.LoginScreen
 import com.slachdevm.mrrgmobile.ui.auth.LoginViewModel
 import com.slachdevm.mrrgmobile.ui.jobs.JobDetailScreen
@@ -51,6 +53,16 @@ object Routes {
     const val NOTIFICATIONS = "notifications"
     const val JOB_ID_ARG = "jobId"
     const val JOB_DETAIL = "job_detail/{$JOB_ID_ARG}"
+    const val ACTIVATION_TOKEN_ARG = "token"
+    const val ACTIVATE_ACCOUNT = "activate_account?$ACTIVATION_TOKEN_ARG={$ACTIVATION_TOKEN_ARG}"
+
+    fun activateAccount(token: String? = null): String {
+        return if (token.isNullOrBlank()) {
+            "activate_account"
+        } else {
+            "activate_account?$ACTIVATION_TOKEN_ARG=$token"
+        }
+    }
 
     fun jobDetail(jobId: Long) = "job_detail/$jobId"
 }
@@ -59,6 +71,7 @@ object Routes {
 fun AppNavigation(
     modifier: Modifier = Modifier,
     initialJobId: Long? = null,
+    activationToken: String? = null,
     themeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit
 ) {
@@ -91,6 +104,11 @@ fun AppNavigation(
             navController.navigate(Routes.jobDetail(jobId))
         }
     }
+    LaunchedEffect(activationToken) {
+        activationToken?.let { token ->
+            navController.navigate(Routes.activateAccount(token))
+        }
+    }
 
     val startDestination = if (authRepository.isLoggedIn()) Routes.JOBS else Routes.LOGIN
 
@@ -106,6 +124,9 @@ fun AppNavigation(
         composable(Routes.LOGIN) {
             LoginScreen(
                 viewModel = provideLoginViewModel(authRepository),
+                onActivateAccountClick = {
+                    navController.navigate(Routes.activateAccount())
+                },
                 onLoginSuccess = {
                     navController.navigate(Routes.JOBS) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
@@ -113,6 +134,31 @@ fun AppNavigation(
                 }
             )
         }
+
+        composable(
+            route = Routes.ACTIVATE_ACCOUNT,
+            arguments = listOf(
+                navArgument(Routes.ACTIVATION_TOKEN_ARG) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val token = backStackEntry.arguments?.getString(Routes.ACTIVATION_TOKEN_ARG)
+
+            ActivateAccountScreen(
+                token = token,
+                viewModel = provideActivateAccountViewModel(authRepository),
+                onBackClick = { navController.popBackStack() },
+                onActivationSuccess = {
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.ACTIVATE_ACCOUNT) { inclusive = true }
+                    }
+                }
+            )
+        }
+
 
         composable(Routes.JOBS) {
             val jobListViewModel = provideJobListViewModel(jobRepository, authRepository, syncRepository)
@@ -201,6 +247,15 @@ fun AppNavigation(
 private fun provideLoginViewModel(authRepository: AuthRepository): LoginViewModel {
     return viewModel(factory = viewModelFactory {
         initializer { LoginViewModel(authRepository) }
+    })
+}
+
+@Composable
+private fun provideActivateAccountViewModel(
+    authRepository: AuthRepository
+): ActivateAccountViewModel {
+    return viewModel(factory = viewModelFactory {
+        initializer { ActivateAccountViewModel(authRepository) }
     })
 }
 

@@ -29,6 +29,7 @@ class MainActivity : ComponentActivity() {
             NotificationHelper.EXTRA_JOB_ID,
             -1L
         ).takeIf { it != -1L }
+        val activationToken = intent?.data?.getQueryParameter("token")
         setContent {
             val themePreferenceManager = remember {
                 ThemePreferenceManager(applicationContext)
@@ -51,6 +52,7 @@ class MainActivity : ComponentActivity() {
                     AppNavigation(
                         modifier = Modifier.padding(innerPadding),
                         initialJobId = initialJobId,
+                        activationToken = activationToken,
                         themeMode = themeMode,
                         onThemeModeChange = { selectedThemeMode ->
                             coroutineScope.launch {

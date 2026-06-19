@@ -84,4 +84,20 @@
     <!-- NotificationHelper -->
     <string name="notif_channel_name">MRRG Notifications</string>
     <string name="notif_channel_desc">Job updates and assignment notifications</string>
+
+    <!-- ActivateAccountScreen -->
+    <string name="activate_account_title">Activate Account</string>
+    <string name="activate_account_heading">Create your password</string>
+    <string name="activate_account_description">Create a password to activate your MRRG account.</string>
+    <string name="activate_account_password_label">Password</string>
+    <string name="activate_account_confirm_password_label">Confirm password</string>
+    <string name="activate_account_button">Activate account</string>
+    <string name="activate_account_back">Back</string>
+    <string name="activate_account_invalid_link">Activation link is invalid</string>
+    <string name="activate_account_password_required">Password and confirmation are required</string>
+    <string name="activate_account_password_mismatch">Passwords do not match</string>
+    <string name="activate_account_failed">Account activation failed</string>
+    <string name="activate_account_success_title">Account activated</string>
+    <string name="activate_account_success_message">Your account has been activated. You can now sign in.</string>
+    <string name="activate_account_back_to_login">Back to login</string>
 </resources>
