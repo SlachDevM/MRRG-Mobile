@@ -8,6 +8,14 @@
 ![Jetpack Compose](https://img.shields.io/badge/Jetpack-Compose-4285F4)
 ![Architecture](https://img.shields.io/badge/Architecture-MVVM-success)
 
+### Login:  
+
+<img width="602" height="1264" alt="image" src="https://github.com/user-attachments/assets/ea49ac12-535c-4ed1-b1d7-98035823b5ff" />
+
+### Dashboard:  
+
+<img width="608" height="1276" alt="image" src="https://github.com/user-attachments/assets/9ab2211d-9dc8-42d2-a6e5-90ac9b1bb454" />
+
 ---
 
 ## Overview
@@ -309,7 +317,42 @@ Dependencies are created explicitly inside the navigation layer rather than thro
 
 ## Screenshots
 
-> Screenshots and GIF demonstrations will be added soon.
+## Account Creation And Log In
+
+<img width="600" height="1262" alt="image" src="https://github.com/user-attachments/assets/cbd3314e-ff07-4b04-b4bf-1eef90a38fa2" />
+<img width="604" height="1274" alt="image" src="https://github.com/user-attachments/assets/9f96d7cd-6494-45d3-82f7-ac303c66c91a" />
+
+### Profile
+
+<img width="590" height="1264" alt="image" src="https://github.com/user-attachments/assets/6063d58e-c781-477e-bcf3-3ab677ff151b" />
+
+### Settings
+
+<img width="598" height="1256" alt="image" src="https://github.com/user-attachments/assets/d89e5558-d628-4554-b05e-6217fcc29d8f" />
+
+### Notifications
+<img width="576" height="1244" alt="image" src="https://github.com/user-attachments/assets/f86ddb60-9d28-42f2-a256-f6da8ea24db1" />
+<img width="584" height="1274" alt="image" src="https://github.com/user-attachments/assets/2f266505-e2ef-49f1-9ad8-e409aa5248e3" />
+
+
+### Job Update
+
+<img width="596" height="1264" alt="image" src="https://github.com/user-attachments/assets/8af77143-7d33-49fb-9c84-59841d69fd62" />
+<img width="610" height="1262" alt="image" src="https://github.com/user-attachments/assets/06ae19b9-ddb2-4ba4-bfe2-f711ba913a43" />
+<img width="506" height="1070" alt="image" src="https://github.com/user-attachments/assets/7ae707ea-cdce-4714-93f1-3a1bbabab6ab" />
+
+## Job Validation
+
+<img width="502" height="1078" alt="image" src="https://github.com/user-attachments/assets/5be05308-35ad-4f07-b466-5c9831cb90e9" />
+<img width="508" height="1068" alt="image" src="https://github.com/user-attachments/assets/1df24ef1-c454-4997-a4be-66845ccd5531" />
+
+
+### Offline and Sync
+
+<img width="482" height="1026" alt="image" src="https://github.com/user-attachments/assets/4e3aa1ca-c195-4a9c-a4f7-d08bf76ec633" />
+<img width="482" height="1032" alt="image" src="https://github.com/user-attachments/assets/b670b2a3-7e97-45b0-8394-e3e4e579846c" />
+<img width="488" height="1018" alt="image" src="https://github.com/user-attachments/assets/a03ebf93-e480-4224-a3fd-9b32b08332cd" />
+
 
 ---
 
