@@ -333,6 +333,8 @@ GitHub: https://github.com/SlachDevM
 
 ## License
 
-This repository is publicly available for demonstration purposes.
+This repository is publicly available for demonstration and portfolio purposes.
 
-The application itself remains proprietary software developed for the MRRG business ecosystem.
+The MRRG application and its business logic were developed for the Margaret River Re-Gutter business and remain proprietary.
+
+Source code is published to showcase software engineering practices and architecture, but redistribution or commercial use of the application is not permitted without permission.
