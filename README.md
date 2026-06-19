@@ -131,8 +131,8 @@ Repository
  ┌────┴────┐
  │         │
 Retrofit  Room
-      │
-      ▼
+    │
+    ▼
 Spring Boot Backend
 ```
 
@@ -175,22 +175,14 @@ Offline changes are stored in a local synchronization queue before being replaye
 Synchronization responsibilities are isolated within SyncRepository, allowing feature repositories to focus exclusively on data retrieval and local persistence.
 
 ```
-User
-
-↓
-
+  User
+   ↓
 Repository
-
-↓
-
+    ↓
 PendingSync
-
-↓
-
+    ↓
 SyncRepository
-
-↓
-
+    ↓
 Spring Boot Backend
 ```
 
@@ -213,17 +205,11 @@ The backend never depends on Firebase delivery success.
 
 ```
 Spring Boot
-
-↓
-
+   ↓
 Notification Service
-
-↓
-
+   ↓
 Firebase
-
-↓
-
+   ↓
 Android
 ```
 
