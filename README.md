@@ -59,6 +59,7 @@ Both the Android application and the React web application share the same Spring
 ## Features
 
 - JWT authentication
+- Account activation via Android deep links
 - Dashboard with daily and weekly views
 - Job management
 - Before and after photo capture
@@ -160,6 +161,18 @@ Current implementation includes:
 
 ---
 
+## Account Activation
+
+The application supports secure account activation through Android deep links.
+
+New users are created by administrators through the React web application.
+
+Users receive an activation email containing a secure deep link.
+
+After choosing a password, the backend activates the account and the user can authenticate normally.
+
+---
+
 ## Push Notifications
 
 Notifications are persisted in PostgreSQL.
@@ -205,7 +218,7 @@ app
 ├── fcm               # Firebase Cloud Messaging
 │
 ├── ui
-│   ├── auth          # Authentication
+│   ├── auth          # Login & account activation
 │   ├── components    # Reusable Compose components
 │   ├── jobs          # Dashboard and job management
 │   ├── navigation    # Navigation graph
