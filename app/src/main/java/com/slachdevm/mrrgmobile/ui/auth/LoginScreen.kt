@@ -105,10 +105,10 @@ fun LoginScreen(
 
         TextButton(
             onClick = {
-                // Register screen will be added later if needed
+                // TODO: Navigate to Account Activation screen once implemented
             }
         ) {
-            Text(stringResource(R.string.login_create_account))
+            Text(stringResource(R.string.login_activate_account))
         }
     }
 }
