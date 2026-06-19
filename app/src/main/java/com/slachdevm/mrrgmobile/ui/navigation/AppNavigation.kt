@@ -124,9 +124,6 @@ fun AppNavigation(
         composable(Routes.LOGIN) {
             LoginScreen(
                 viewModel = provideLoginViewModel(authRepository),
-                onActivateAccountClick = {
-                    navController.navigate(Routes.activateAccount())
-                },
                 onLoginSuccess = {
                     navController.navigate(Routes.JOBS) {
                         popUpTo(Routes.LOGIN) { inclusive = true }

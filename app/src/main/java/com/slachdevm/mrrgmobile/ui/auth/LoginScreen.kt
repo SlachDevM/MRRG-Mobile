@@ -12,7 +12,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,7 +26,6 @@ import com.slachdevm.mrrgmobile.R
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    onActivateAccountClick: () -> Unit,
     viewModel: LoginViewModel
 ) {
     val uiState by viewModel.uiStateFlow.collectAsState()
@@ -100,14 +98,6 @@ fun LoginScreen(
             } else {
                 Text(stringResource(R.string.login_button))
             }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextButton(
-            onClick = onActivateAccountClick
-        ) {
-            Text(stringResource(R.string.login_activate_account))
         }
     }
 }
