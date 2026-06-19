@@ -4,7 +4,7 @@
     <string name="login_email_label">Email</string>
     <string name="login_password_label">Password</string>
     <string name="login_button">Login</string>
-    <string name="login_create_account">Create account</string>
+    <string name="login_activate_account">Activate account</string>
 
     <!-- JobListScreen -->
     <string name="greeting_morning">Good morning</string>

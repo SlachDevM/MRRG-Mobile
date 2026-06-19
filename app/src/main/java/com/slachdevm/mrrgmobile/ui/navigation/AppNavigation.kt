@@ -174,7 +174,8 @@ fun AppNavigation(
                 ProfileRepository(RetrofitClient.userApi, database.userProfileDao())
             }
             ProfileScreen(
-                viewModel = provideProfileViewModel(profileRepository)
+                viewModel = provideProfileViewModel(profileRepository),
+                onBackClick = { navController.popBackStack() }
             )
         }
 

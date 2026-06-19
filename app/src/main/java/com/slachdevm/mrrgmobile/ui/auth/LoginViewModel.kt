@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slachdevm.mrrgmobile.data.repository.AuthRepository
 import com.slachdevm.mrrgmobile.fcm.FcmTokenManager
+import com.slachdevm.mrrgmobile.BuildConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -62,7 +63,9 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
                     if (!fcmToken.isNullOrBlank()) {
                         authRepository.updateFcmToken(fcmToken)
                             .onSuccess {
-                                Log.d(TAG, "FCM token sent to backend")
+                                if (BuildConfig.DEBUG) {
+                                    Log.d(TAG, "FCM token sent to backend")
+                                }
                             }
                             .onFailure { error ->
                                 Log.e(TAG, "Failed to send FCM token to backend", error)
