@@ -14,7 +14,7 @@
 
 ### Dashboard:  
 
-<img width="608" height="1276" alt="image" src="https://github.com/user-attachments/assets/9ab2211d-9dc8-42d2-a6e5-90ac9b1bb454" />
+<img width="484" height="1044" alt="image" src="https://github.com/user-attachments/assets/98bf900e-c264-477e-a5f7-1b6453cd26d6" />
 
 ---
 
