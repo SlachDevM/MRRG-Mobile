@@ -14,7 +14,8 @@
 
 ### Dashboard:  
 
-<img width="484" height="1044" alt="image" src="https://github.com/user-attachments/assets/98bf900e-c264-477e-a5f7-1b6453cd26d6" />
+<img width="458" height="944" alt="image" src="https://github.com/user-attachments/assets/cc621991-c109-4a1f-a182-be8b39db4e0e" />
+
 
 ---
 
@@ -330,12 +331,13 @@ Dependencies are created explicitly inside the navigation layer rather than thro
 ## Job Validation
 
 <img width="502" height="1078" alt="image" src="https://github.com/user-attachments/assets/5be05308-35ad-4f07-b466-5c9831cb90e9" />
-<img width="508" height="1068" alt="image" src="https://github.com/user-attachments/assets/1df24ef1-c454-4997-a4be-66845ccd5531" />
+<img width="1006" height="366" alt="image" src="https://github.com/user-attachments/assets/ea324b00-80ae-4d1b-a20d-2e5547b5c002" />
+
 
 
 ### Offline and Sync
 
-<img width="482" height="1026" alt="image" src="https://github.com/user-attachments/assets/4e3aa1ca-c195-4a9c-a4f7-d08bf76ec633" />
+<img width="442" height="448" alt="image" src="https://github.com/user-attachments/assets/65ba341a-2d97-4901-8ca7-1da87ef8d0ff" />
 <img width="482" height="1032" alt="image" src="https://github.com/user-attachments/assets/b670b2a3-7e97-45b0-8394-e3e4e579846c" />
 <img width="488" height="1018" alt="image" src="https://github.com/user-attachments/assets/a03ebf93-e480-4224-a3fd-9b32b08332cd" />
 
