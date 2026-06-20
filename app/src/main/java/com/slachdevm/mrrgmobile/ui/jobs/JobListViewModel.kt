@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slachdevm.mrrgmobile.data.repository.AuthRepository
 import com.slachdevm.mrrgmobile.data.repository.JobRepository
+import com.slachdevm.mrrgmobile.data.repository.NotificationRepository
 import com.slachdevm.mrrgmobile.data.sync.SyncRepository
 import com.slachdevm.mrrgmobile.domain.model.Job
 import com.slachdevm.mrrgmobile.domain.model.UserRole
@@ -14,9 +15,7 @@ import com.slachdevm.mrrgmobile.ui.components.snackbar.AppSnackbarManager
 import com.slachdevm.mrrgmobile.ui.components.snackbar.SnackbarMessages.JOBS_UPDATED
 import com.slachdevm.mrrgmobile.ui.components.snackbar.SnackbarMessages.NETWORK_ERROR
 import kotlinx.coroutines.launch
-import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
 
 enum class ViewMode {
     DAY_3, WEEK
@@ -36,7 +35,8 @@ data class JobListUiState(
 class JobListViewModel(
     private val jobRepository: JobRepository,
     private val authRepository: AuthRepository,
-    private val syncRepository: SyncRepository
+    private val syncRepository: SyncRepository,
+    private val notificationRepository: NotificationRepository
 ) : ViewModel() {
 
     var uiState by mutableStateOf(JobListUiState())
@@ -56,27 +56,24 @@ class JobListViewModel(
             
             val start = uiState.selectedDate
             val end = if (uiState.viewMode == ViewMode.DAY_3) start.plusDays(2) else start.plusDays(6)
-            
-            val startMillis = start.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-            val endMillis = end.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
             syncRepository.synchronize()
                 .onFailure {
                     // Pending items stay queued.
                 }
-            val result = jobRepository.getScheduledJobs(startMillis, endMillis)
+            val result = jobRepository.getScheduledJobs(start, end)
             
             uiState = if (result.isSuccess) {
                 val dataSourceResult = result.getOrNull()
                 val jobs = dataSourceResult?.data.orEmpty()
+                
+                // Grouping by LocalDate
                 val grouped = jobs.mapNotNull { job ->
-                    job.jobDate?.let { dateMillis ->
-                        val date = Instant.ofEpochMilli(dateMillis)
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDate()
+                    job.jobDate?.let { date ->
                         date to job
                     }
                 }.groupBy({ it.first }, { it.second })
+
                 onSuccess?.invoke()
                 uiState.copy(
                     jobsByDate = grouped,

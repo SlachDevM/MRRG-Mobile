@@ -3,12 +3,13 @@ package com.slachdevm.mrrgmobile.data.sync
 import android.util.Log
 import com.google.gson.Gson
 import com.slachdevm.mrrgmobile.BuildConfig
+import com.slachdevm.mrrgmobile.data.api.JobApi
+import com.slachdevm.mrrgmobile.data.dto.JobDto
+import com.slachdevm.mrrgmobile.data.dto.toDomain
 import com.slachdevm.mrrgmobile.data.local.dao.JobDao
 import com.slachdevm.mrrgmobile.data.local.dao.PendingSyncDao
 import com.slachdevm.mrrgmobile.data.local.entity.PendingSyncType
 import com.slachdevm.mrrgmobile.data.local.mapper.toEntity
-import com.slachdevm.mrrgmobile.data.api.JobApi
-import com.slachdevm.mrrgmobile.domain.model.Job
 
 class SyncRepository(
     private val jobApi: JobApi,
@@ -61,16 +62,16 @@ class SyncRepository(
         jobId: Long,
         payload: String
     ) {
-        val job = gson.fromJson(payload, Job::class.java)
+        val jobDto = gson.fromJson(payload, JobDto::class.java)
 
-        val response = jobApi.updateJob(jobId, job)
+        val response = jobApi.updateJob(jobId, jobDto)
 
         val body = response.body()
         if (!response.isSuccessful || body == null) {
             throw Exception("Failed to sync job update: ${response.code()}")
         }
 
-        val updatedJob = body
+        val updatedJob = body.toDomain()
 
         updatedJob.toEntity()?.let { jobDao.upsertJob(it) }
 
