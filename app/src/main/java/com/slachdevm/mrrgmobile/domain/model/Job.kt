@@ -1,5 +1,7 @@
 package com.slachdevm.mrrgmobile.domain.model
 
+import java.time.LocalDate
+
 data class Job(
     val id: Long? = null,
     val clientName: String,
@@ -7,7 +9,7 @@ data class Job(
     val clientAddress: String,
     val jobTypes: String,
     val status: JobStatus = JobStatus.PENDING,
-    val jobDate: Long? = null,
+    val jobDate: LocalDate? = null,
     val jobStartHour: String? = null,
     val assignedWorkers: String? = null,
     val details: String? = null,

@@ -1,12 +1,9 @@
-package com.slachdevm.mrrgmobile.data.local.entity
+package com.slachdevm.mrrgmobile.data.dto
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import com.slachdevm.mrrgmobile.domain.model.JobStatus
 
-@Entity(tableName = "jobs")
-data class JobEntity(
-    @PrimaryKey val id: Long,
+data class JobDto(
+    val id: Long?,
     val clientName: String,
     val clientPhone: String,
     val clientAddress: String,

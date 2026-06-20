@@ -158,7 +158,7 @@ fun AppNavigation(
 
 
         composable(Routes.JOBS) {
-            val jobListViewModel = provideJobListViewModel(jobRepository, authRepository, syncRepository)
+            val jobListViewModel = provideJobListViewModel(jobRepository, authRepository, syncRepository, notificationRepository)
 
             DisposableEffect(lifecycleOwner) {
                 val observer = LifecycleEventObserver { _, event ->
@@ -174,10 +174,12 @@ fun AppNavigation(
             JobListScreen(
                 viewModel = jobListViewModel,
                 notificationUnreadCount = notificationViewModel.uiState.unreadCount,
+                onRefreshNotifications = notificationViewModel::loadUnreadCount,
                 onNotificationsClick = { navController.navigate(Routes.NOTIFICATIONS) },
                 onSettingsClick = { navController.navigate(Routes.SETTINGS) },
                 onProfileClick = { navController.navigate(Routes.PROFILE) },
                 onJobClick = { jobId -> navController.navigate(Routes.jobDetail(jobId)) },
+
                 onLogout = {
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(Routes.JOBS) { inclusive = true }
@@ -260,10 +262,11 @@ private fun provideActivateAccountViewModel(
 private fun provideJobListViewModel(
     jobRepository: JobRepository,
     authRepository: AuthRepository,
-    syncRepository: SyncRepository
+    syncRepository: SyncRepository,
+    notificationRepository: NotificationRepository
 ): JobListViewModel {
     return viewModel(factory = viewModelFactory {
-        initializer { JobListViewModel(jobRepository, authRepository, syncRepository) }
+        initializer { JobListViewModel(jobRepository, authRepository, syncRepository, notificationRepository) }
     })
 }
 

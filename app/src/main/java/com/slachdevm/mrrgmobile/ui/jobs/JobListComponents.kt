@@ -56,6 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.slachdevm.mrrgmobile.R
 import com.slachdevm.mrrgmobile.domain.model.Job
@@ -112,7 +113,13 @@ internal fun DashboardHeader(
         else -> stringResource(R.string.greeting_evening)
     }
 
-    Column {
+    val displayName = userName
+        ?.firstName()
+        ?: stringResource(R.string.default_worker_name)
+
+    Column (
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Text(
             text = "👋 $greeting",
             style = MaterialTheme.typography.labelMedium,
@@ -120,12 +127,12 @@ internal fun DashboardHeader(
         )
 
         Text(
-            text = userName ?: stringResource(R.string.default_worker_name),
+            text = displayName,
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
-        
-        Spacer(modifier = Modifier.height(28.dp))
     }
 }
 
@@ -146,7 +153,10 @@ internal fun DashboardActions(
         label = "NotificationBadgeScaleAnimation"
     )
 
-    Column(horizontalAlignment = Alignment.End) {
+    Column(
+        modifier = Modifier.padding(top = 18.dp),
+        horizontalAlignment = Alignment.End
+    ) {
         if (isOfflineData) {
             OfflineIndicator(modifier = Modifier.padding(end = 8.dp))
         }
@@ -497,7 +507,7 @@ internal fun JobItem(
                     )
                 } else {
                     Text(
-                        text = job.status.toLabel(),
+                        text = "${job.jobStartHour} · ${job.status.toLabel()}",
                         style = MaterialTheme.typography.labelSmall,
                         color = if (job.priorityLevel >= 3) {
                             MaterialTheme.colorScheme.error
@@ -595,3 +605,6 @@ internal fun JobItem(
         }
     }
 }
+
+private fun String.firstName(): String =
+    trim().substringBefore(' ')

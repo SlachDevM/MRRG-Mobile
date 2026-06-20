@@ -2,6 +2,8 @@ package com.slachdevm.mrrgmobile.data.repository
 
 import com.google.gson.Gson
 import com.slachdevm.mrrgmobile.data.api.JobApi
+import com.slachdevm.mrrgmobile.data.dto.toDomain
+import com.slachdevm.mrrgmobile.data.dto.toDto
 import com.slachdevm.mrrgmobile.data.local.dao.JobDao
 import com.slachdevm.mrrgmobile.data.local.dao.PendingSyncDao
 import com.slachdevm.mrrgmobile.data.local.entity.PendingSyncEntity
@@ -10,6 +12,7 @@ import com.slachdevm.mrrgmobile.data.local.mapper.toDomain
 import com.slachdevm.mrrgmobile.data.local.mapper.toEntity
 import com.slachdevm.mrrgmobile.data.model.DataSourceResult
 import com.slachdevm.mrrgmobile.domain.model.Job
+import java.time.LocalDate
 
 class JobRepository(
     private val jobApi: JobApi,
@@ -20,28 +23,31 @@ class JobRepository(
     private val gson = Gson()
 
     suspend fun getScheduledJobs(
-        weekStart: Long,
-        weekEnd: Long
+        startDate: LocalDate,
+        endDate: LocalDate
     ): Result<DataSourceResult<List<Job>>> {
+        val startStr = startDate.toString()
+        val endStr = endDate.toString()
+        
         return try {
-            val response = jobApi.getScheduledJobs(weekStart, weekEnd)
-
+            val response = jobApi.getScheduledJobs(startStr, endStr)
             val body = response.body()
+
             if (response.isSuccessful && body != null) {
-                val remoteJobs = body
+                val domainJobs = body.map { it.toDomain() }
 
                 jobDao.upsertJobs(
-                    remoteJobs.mapNotNull { it.toEntity() }
+                    domainJobs.mapNotNull { it.toEntity() }
                 )
 
                 Result.success(
                     DataSourceResult(
-                        data = remoteJobs,
+                        data = domainJobs,
                         isOfflineData = false
                     )
                 )
             } else {
-                val cachedJobs = jobDao.getScheduledJobs(weekStart, weekEnd)
+                val cachedJobs = jobDao.getScheduledJobs(startStr, endStr)
                     .map { it.toDomain() }
 
                 if (cachedJobs.isNotEmpty()) {
@@ -58,7 +64,7 @@ class JobRepository(
                 }
             }
         } catch (e: Exception) {
-            val cachedJobs = jobDao.getScheduledJobs(weekStart, weekEnd)
+            val cachedJobs = jobDao.getScheduledJobs(startStr, endStr)
                 .map { it.toDomain() }
 
             if (cachedJobs.isNotEmpty()) {
@@ -77,10 +83,10 @@ class JobRepository(
     suspend fun getJobDetails(id: Long): Result<Job> {
         return try {
             val response = jobApi.getJobDetails(id)
-
             val body = response.body()
+
             if (response.isSuccessful && body != null) {
-                val remoteJob = body
+                val remoteJob = body.toDomain()
 
                 remoteJob.toEntity()?.let { jobDao.upsertJob(it) }
 
@@ -120,11 +126,11 @@ class JobRepository(
 
     suspend fun updateJob(id: Long, job: Job): Result<Job> {
         return try {
-            val response = jobApi.updateJob(id, job)
-
+            val response = jobApi.updateJob(id, job.toDto())
             val body = response.body()
+
             if (response.isSuccessful && body != null) {
-                val updatedJob = body
+                val updatedJob = body.toDomain()
 
                 updatedJob.toEntity()?.let { jobDao.upsertJob(it) }
 
@@ -144,14 +150,14 @@ class JobRepository(
 
             pendingSyncDao.upsertPendingItem(
                 existingPendingItem?.copy(
-                    payload = gson.toJson(localJob),
+                    payload = gson.toJson(localJob.toDto()),
                     retryCount = 0,
                     lastError = null,
                     createdAt = System.currentTimeMillis()
                 ) ?: PendingSyncEntity(
                     type = PendingSyncType.UPDATE_JOB,
                     entityId = id,
-                    payload = gson.toJson(localJob)
+                    payload = gson.toJson(localJob.toDto())
                 )
             )
 

@@ -16,6 +16,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 fun JobListScreen(
     viewModel: JobListViewModel,
     notificationUnreadCount: Long,
+    onRefreshNotifications: () -> Unit,
     onNotificationsClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onProfileClick: () -> Unit,
@@ -56,7 +57,10 @@ fun JobListScreen(
 
             SwipeRefresh(
                 state = swipeRefreshState,
-                onRefresh = { viewModel.refreshJobs() },
+                onRefresh = {
+                        viewModel.refreshJobs()
+                        onRefreshNotifications()
+                    },
                 modifier = Modifier.fillMaxSize()
             ) {
                 val hasJobs = state.jobsByDate.values.any { it.isNotEmpty() }

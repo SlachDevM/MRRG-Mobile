@@ -11,13 +11,13 @@ interface JobDao {
     @Query(
         """
         SELECT * FROM jobs
-        WHERE jobDate BETWEEN :startMillis AND :endMillis
+        WHERE jobDate BETWEEN :startDate AND :endDate
         ORDER BY jobDate ASC, jobStartHour ASC
         """
     )
     suspend fun getScheduledJobs(
-        startMillis: Long,
-        endMillis: Long
+        startDate: String,
+        endDate: String
     ): List<JobEntity>
 
     @Query("SELECT * FROM jobs WHERE id = :id LIMIT 1")
