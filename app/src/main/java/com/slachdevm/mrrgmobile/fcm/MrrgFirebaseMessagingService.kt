@@ -4,14 +4,46 @@ import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.slachdevm.mrrgmobile.BuildConfig
+import com.slachdevm.mrrgmobile.data.api.RetrofitClient
+import com.slachdevm.mrrgmobile.data.repository.AuthRepository
+import com.slachdevm.mrrgmobile.data.session.SessionManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 class MrrgFirebaseMessagingService : FirebaseMessagingService() {
+
+    private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
 
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "New FCM token: $token")
+        }
+
+        // Initialize dependencies manually for the background service
+        val sessionManager = SessionManager(applicationContext)
+        val authRepository = AuthRepository(
+            authApi = RetrofitClient.authApi,
+            userApi = RetrofitClient.userApi,
+            sessionManager = sessionManager
+        )
+
+        // Only update backend if user is already logged in
+        if (authRepository.isLoggedIn()) {
+            serviceScope.launch {
+                authRepository.updateFcmToken(token)
+                    .onSuccess {
+                        if (BuildConfig.DEBUG) {
+                            Log.d(TAG, "FCM token successfully updated on backend after refresh")
+                        }
+                    }
+                    .onFailure { error ->
+                        Log.e(TAG, "Failed to update FCM token on backend after refresh", error)
+                    }
+            }
         }
     }
 

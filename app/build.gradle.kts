@@ -7,11 +7,7 @@ plugins {
 
 android {
     namespace = "com.slachdevm.mrrgmobile"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.slachdevm.mrrgmobile"
@@ -21,14 +17,39 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:4000\"")
+    }
+
+    signingConfigs {
+        create("release") {
+            val storeFileProp = project.findProperty("MRRG_RELEASE_STORE_FILE")?.toString()
+            if (!storeFileProp.isNullOrBlank()) {
+                storeFile = file(storeFileProp)
+                storePassword = project.findProperty("MRRG_RELEASE_STORE_PASSWORD")?.toString()
+                keyAlias = project.findProperty("MRRG_RELEASE_KEY_ALIAS")?.toString()
+                keyPassword = project.findProperty("MRRG_RELEASE_KEY_PASSWORD")?.toString()
+            }
+        }
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:4000\"")
+        }
         release {
-            optimization {
-                enable = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            
+            val isSigningConfigSet = project.findProperty("MRRG_RELEASE_STORE_FILE")?.toString()?.isNotBlank() ?: false
+            if (isSigningConfigSet) {
+                signingConfig = signingConfigs.getByName("release")
             }
+
+            // Production URL - replace with real value before final release
+            buildConfigField("String", "BASE_URL", "\"https://api.mrrg.com.au\"")
         }
     }
     compileOptions {
@@ -55,6 +76,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.fragment.ktx)
     implementation(libs.kotlinx.coroutines.play.services)
 
     implementation("androidx.navigation:navigation-compose:2.8.5")
