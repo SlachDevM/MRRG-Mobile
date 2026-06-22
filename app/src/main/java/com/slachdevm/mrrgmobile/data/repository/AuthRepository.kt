@@ -8,8 +8,8 @@ import com.slachdevm.mrrgmobile.data.dto.LoginRequestDto
 import com.slachdevm.mrrgmobile.data.dto.LoginResponseDto
 import com.slachdevm.mrrgmobile.data.dto.ActivateAccountRequestDto
 import com.slachdevm.mrrgmobile.data.model.FcmTokenRequest
+import com.slachdevm.mrrgmobile.data.util.ErrorUtils
 import com.slachdevm.mrrgmobile.domain.model.UserRole
-import com.google.gson.JsonParser
 import retrofit2.Response
 
 class AuthRepository(
@@ -44,7 +44,7 @@ class AuthRepository(
                     Result.failure(Exception("Empty response from server"))
                 }
             } else {
-                val errorMessage = extractErrorMessage(response, "Incorrect email or password")
+                val errorMessage = ErrorUtils.extractErrorMessage(response, "Incorrect email or password")
                 Result.failure(Exception(errorMessage))
             }
         } catch (exception: Exception) {
@@ -73,7 +73,7 @@ class AuthRepository(
             if (response.isSuccessful) {
                 Result.success(Unit)
             } else {
-                val errorMessage = extractErrorMessage(response, "Invalid activation token")
+                val errorMessage = ErrorUtils.extractErrorMessage(response, "Invalid activation token")
                 Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
@@ -96,26 +96,10 @@ class AuthRepository(
             if (response.isSuccessful) {
                 Result.success(Unit)
             } else {
-                Result.failure(Exception(extractErrorMessage(response, "Account activation failed")))
+                Result.failure(Exception(ErrorUtils.extractErrorMessage(response, "Account activation failed")))
             }
         } catch (exception: Exception) {
             Result.failure(exception)
-        }
-    }
-
-    private fun extractErrorMessage(response: Response<*>, fallbackMessage: String): String {
-        return try {
-            val errorBody = response.errorBody()?.string()
-            if (errorBody.isNullOrBlank()) {
-                fallbackMessage
-            } else if (errorBody.trim().startsWith("{")) {
-                val jsonObject = JsonParser.parseString(errorBody).asJsonObject
-                jsonObject.get("message")?.asString ?: fallbackMessage
-            } else {
-                errorBody
-            }
-        } catch (exception: Exception) {
-            fallbackMessage
         }
     }
 

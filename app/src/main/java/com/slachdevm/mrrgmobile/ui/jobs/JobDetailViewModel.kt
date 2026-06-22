@@ -97,36 +97,39 @@ class JobDetailViewModel(
                         AppSnackbarManager.showSuccess(it)
                     }
                 } else {
+                    val errorMessage = result.exceptionOrNull()?.message ?: JOB_UPDATE_FAILED
                     uiState = uiState.copy(
                         isUpdating = false,
-                        error = result.exceptionOrNull()?.message ?: "Unable to update job"
+                        error = errorMessage
                     )
 
-                    AppSnackbarManager.showError(JOB_UPDATE_FAILED)
+                    AppSnackbarManager.showError(errorMessage)
                 }
             } catch (e: Exception) {
+                val errorMessage = e.message ?: NETWORK_ERROR
                 uiState = uiState.copy(
                     isUpdating = false,
-                    error = e.message ?: "Unexpected error"
+                    error = errorMessage
                 )
 
-                AppSnackbarManager.showError(NETWORK_ERROR)
+                AppSnackbarManager.showError(errorMessage)
             }
         }
     }
 
     fun completeJob() {
         viewModelScope.launch {
-            uiState = uiState.copy(isUpdating = true)
+            uiState = uiState.copy(isUpdating = true, error = null)
             val result = repository.completeJob(jobId)
-            uiState = if (result.isSuccess) {
+            if (result.isSuccess) {
                 AppSnackbarManager.showSuccess(JOB_COMPLETED)
-                uiState.copy(isUpdating = false, updateSuccess = true)
+                uiState = uiState.copy(isUpdating = false, updateSuccess = true)
             } else {
-                AppSnackbarManager.showError(NETWORK_ERROR)
-                uiState.copy(
+                val errorMessage = result.exceptionOrNull()?.message ?: "Failed to complete job"
+                AppSnackbarManager.showError(errorMessage)
+                uiState = uiState.copy(
                     isUpdating = false,
-                    error = result.exceptionOrNull()?.message ?: "Failed to complete job"
+                    error = errorMessage
                 )
             }
         }

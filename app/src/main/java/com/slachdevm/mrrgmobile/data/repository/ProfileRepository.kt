@@ -5,6 +5,7 @@ import com.slachdevm.mrrgmobile.data.dto.UserProfileDto
 import com.slachdevm.mrrgmobile.data.local.dao.UserProfileDao
 import com.slachdevm.mrrgmobile.data.local.mapper.toDomain
 import com.slachdevm.mrrgmobile.data.local.mapper.toEntity
+import com.slachdevm.mrrgmobile.data.util.ErrorUtils
 
 class ProfileRepository(
     private val userApi: UserApi,
@@ -27,7 +28,8 @@ class ProfileRepository(
                 if (cachedProfile != null) {
                     Result.success(cachedProfile)
                 } else {
-                    Result.failure(Exception("Failed to fetch profile: ${response.code()}"))
+                    val errorMessage = ErrorUtils.extractErrorMessage(response, "Failed to fetch profile")
+                    Result.failure(Exception(errorMessage))
                 }
             }
         } catch (e: Exception) {

@@ -10,6 +10,7 @@ import com.slachdevm.mrrgmobile.data.local.dao.JobDao
 import com.slachdevm.mrrgmobile.data.local.dao.PendingSyncDao
 import com.slachdevm.mrrgmobile.data.local.entity.PendingSyncType
 import com.slachdevm.mrrgmobile.data.local.mapper.toEntity
+import com.slachdevm.mrrgmobile.data.util.ErrorUtils
 
 class SyncRepository(
     private val jobApi: JobApi,
@@ -67,15 +68,16 @@ class SyncRepository(
         val response = jobApi.updateJob(jobId, jobDto)
 
         val body = response.body()
-        if (!response.isSuccessful || body == null) {
-            throw Exception("Failed to sync job update: ${response.code()}")
+        if (response.isSuccessful && body != null) {
+            val updatedJob = body.toDomain()
+
+            updatedJob.toEntity()?.let { jobDao.upsertJob(it) }
+
+            pendingSyncDao.deletePendingItem(syncId)
+        } else {
+            val errorMessage = ErrorUtils.extractErrorMessage(response, "Failed to sync job update")
+            throw Exception(errorMessage)
         }
-
-        val updatedJob = body.toDomain()
-
-        updatedJob.toEntity()?.let { jobDao.upsertJob(it) }
-
-        pendingSyncDao.deletePendingItem(syncId)
     }
 
     companion object {

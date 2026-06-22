@@ -1,6 +1,7 @@
 package com.slachdevm.mrrgmobile.data.repository
 
 import com.slachdevm.mrrgmobile.data.api.NotificationApi
+import com.slachdevm.mrrgmobile.data.util.ErrorUtils
 import com.slachdevm.mrrgmobile.domain.model.Notification
 
 class NotificationRepository(
@@ -13,7 +14,8 @@ class NotificationRepository(
             if (response.isSuccessful && body != null) {
                 Result.success(body)
             } else {
-                Result.failure(Exception("Failed to load notifications"))
+                val errorMessage = ErrorUtils.extractErrorMessage(response, "Failed to load notifications")
+                Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -27,7 +29,8 @@ class NotificationRepository(
             if (response.isSuccessful && body != null) {
                 Result.success(body)
             } else {
-                Result.failure(Exception("Failed to load unread count"))
+                val errorMessage = ErrorUtils.extractErrorMessage(response, "Failed to load unread count")
+                Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -41,7 +44,8 @@ class NotificationRepository(
             if (response.isSuccessful && body != null) {
                 Result.success(body)
             } else {
-                Result.failure(Exception("Failed to mark notification as read"))
+                val errorMessage = ErrorUtils.extractErrorMessage(response, "Failed to mark notification as read")
+                Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -54,7 +58,8 @@ class NotificationRepository(
             if (response.isSuccessful) {
                 Result.success(Unit)
             } else {
-                Result.failure(Exception("Failed to mark all notifications as read"))
+                val errorMessage = ErrorUtils.extractErrorMessage(response, "Failed to mark all notifications as read")
+                Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
             Result.failure(e)
