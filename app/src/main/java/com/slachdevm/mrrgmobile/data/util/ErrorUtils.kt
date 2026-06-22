@@ -15,7 +15,7 @@ object ErrorUtils {
             } else {
                 errorBody
             }
-        } catch (exception: Exception) {
+        } catch (_: Exception) {
             fallbackMessage
         }
     }

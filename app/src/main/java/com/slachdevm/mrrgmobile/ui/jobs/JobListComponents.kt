@@ -344,7 +344,6 @@ internal fun JobListContent(
     viewMode: ViewMode,
     jobsByDate: Map<LocalDate, List<Job>>,
     userId: Long,
-    userName: String,
     userRole: UserRole?,
     onJobClick: (Long) -> Unit
 ) {
@@ -365,7 +364,6 @@ internal fun JobListContent(
                 date = date,
                 jobs = jobsForDate,
                 currentUserId = userId,
-                currentUserName = userName,
                 currentUserRole = userRole,
                 onJobClick = onJobClick
             )
@@ -379,7 +377,6 @@ internal fun DaySection(
     date: LocalDate,
     jobs: List<Job>,
     currentUserId: Long,
-    currentUserName: String,
     currentUserRole: UserRole?,
     onJobClick: (Long) -> Unit
 ) {

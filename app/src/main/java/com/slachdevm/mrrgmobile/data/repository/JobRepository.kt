@@ -141,7 +141,7 @@ class JobRepository(
                 val errorMessage = ErrorUtils.extractErrorMessage(response, "Failed to update job")
                 Result.failure(Exception(errorMessage))
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             val localJob = job.copy(id = id)
 
             localJob.toEntity()?.let { jobDao.upsertJob(it) }

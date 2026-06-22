@@ -10,7 +10,6 @@ import com.slachdevm.mrrgmobile.data.dto.ActivateAccountRequestDto
 import com.slachdevm.mrrgmobile.data.model.FcmTokenRequest
 import com.slachdevm.mrrgmobile.data.util.ErrorUtils
 import com.slachdevm.mrrgmobile.domain.model.UserRole
-import retrofit2.Response
 
 class AuthRepository(
     private val authApi: AuthApi,
