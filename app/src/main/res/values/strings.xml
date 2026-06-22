@@ -4,6 +4,9 @@
     <string name="login_email_label">Email</string>
     <string name="login_password_label">Password</string>
     <string name="login_button">Login</string>
+    <string name="error_invalid_credentials">Incorrect email or password</string>
+    <string name="error_login_failed">Login failed</string>
+    <string name="error_unexpected">An unexpected error occurred</string>
 
     <!-- JobListScreen -->
     <string name="greeting_morning">Good morning</string>

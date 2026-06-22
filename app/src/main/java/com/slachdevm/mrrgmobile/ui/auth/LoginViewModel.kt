@@ -75,7 +75,7 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
                 .onFailure { exception ->
                     _uiStateFlow.value = _uiStateFlow.value.copy(
                         isLoading = false,
-                        errorMessage = exception.message ?: "Login failed"
+                        errorMessage = exception.message ?: "An unexpected error occurred"
                     )
                 }
         }
