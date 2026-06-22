@@ -83,6 +83,7 @@ fun JobListScreen(
                             selectedDate = state.selectedDate,
                             viewMode = state.viewMode,
                             jobsByDate = state.jobsByDate,
+                            userId = state.userId,
                             userName = state.userName ?: "",
                             userRole = state.userRole,
                             onJobClick = onJobClick

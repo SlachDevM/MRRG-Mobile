@@ -34,6 +34,7 @@ class AuthRepository(
 
                 if (body != null) {
                     sessionManager.saveAuthToken(body.token)
+                    sessionManager.saveUserId(body.userId)
                     sessionManager.saveUserName(body.name)
                     sessionManager.saveUserRole(body.role)
                     RetrofitClient.setAuthToken(body.token)
@@ -114,6 +115,10 @@ class AuthRepository(
 
     fun getUserName(): String? {
         return sessionManager.fetchUserName()
+    }
+
+    fun getUserId(): Long {
+        return sessionManager.fetchUserId()
     }
 
     fun getUserRole(): UserRole? {

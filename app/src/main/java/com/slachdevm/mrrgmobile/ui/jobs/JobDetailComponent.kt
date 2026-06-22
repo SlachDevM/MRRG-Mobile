@@ -55,6 +55,12 @@ fun JobInfoSection(
     StatusChip(status = job.status)
     DetailItem(label = stringResource(R.string.label_priority), value = job.priorityLevel.toPriorityLabel())
     DetailItem(label = stringResource(R.string.label_details), value = job.details ?: stringResource(R.string.no_extra_details))
+
+    if (!job.assignedWorkerNames.isNullOrBlank()) {
+        DetailItem(label = stringResource(R.string.label_assigned_workers), value = job.assignedWorkerNames)
+    } else if (!job.assignedWorkers.isNullOrBlank()) {
+        DetailItem(label = stringResource(R.string.label_assigned_workers), value = stringResource(R.string.assigned_workers_unavailable))
+    }
 }
 
 @Composable

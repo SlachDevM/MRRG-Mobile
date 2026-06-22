@@ -12,6 +12,7 @@ data class JobDto(
     val jobDate: String?,
     val jobStartHour: String?,
     val assignedWorkers: String?,
+    val assignedWorkerDetails: List<AssignedWorkerDto>?,
     val details: String?,
     val beforePhotos: List<String>,
     val afterPhotos: List<String>,

@@ -15,6 +15,7 @@ data class JobEntity(
     val jobDate: String?,
     val jobStartHour: String?,
     val assignedWorkers: String?,
+    val assignedWorkerNames: String?,
     val details: String?,
     val beforePhotos: List<String>,
     val afterPhotos: List<String>,

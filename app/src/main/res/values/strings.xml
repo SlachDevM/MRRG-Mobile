@@ -22,6 +22,7 @@
     <string name="no_work_planned_period">No work planned for this period.</string>
     <string name="no_work_planned_today">No work planned today. Enjoy your day!</string>
     <string name="status_not_assigned">Not Assigned</string>
+    <string name="assigned_workers_unavailable">Assigned workers unavailable</string>
 
     <!-- JobDetailScreen -->
     <string name="job_details_title">Job Details</string>
@@ -39,6 +40,7 @@
     <string name="label_type">Type</string>
     <string name="label_priority">Priority</string>
     <string name="label_details">Details</string>
+    <string name="label_assigned_workers">Assigned Workers</string>
     <string name="no_extra_details">No extra details</string>
     <string name="label_notes">Notes</string>
     <string name="placeholder_add_notes">Add notes here...</string>

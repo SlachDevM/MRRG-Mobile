@@ -23,6 +23,7 @@ enum class ViewMode {
 
 data class JobListUiState(
     val jobsByDate: Map<LocalDate, List<Job>> = emptyMap(),
+    val userId: Long = -1L,
     val userName: String? = null,
     val userRole: UserRole? = null,
     val isLoading: Boolean = false,
@@ -44,6 +45,7 @@ class JobListViewModel(
 
     init {
         uiState = uiState.copy(
+            userId = authRepository.getUserId(),
             userName = authRepository.getUserName(),
             userRole = authRepository.getUserRole()
         )

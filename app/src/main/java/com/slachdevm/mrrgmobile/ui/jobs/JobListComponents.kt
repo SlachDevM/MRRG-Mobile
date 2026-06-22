@@ -343,6 +343,7 @@ internal fun JobListContent(
     selectedDate: LocalDate,
     viewMode: ViewMode,
     jobsByDate: Map<LocalDate, List<Job>>,
+    userId: Long,
     userName: String,
     userRole: UserRole?,
     onJobClick: (Long) -> Unit
@@ -363,6 +364,7 @@ internal fun JobListContent(
                 modifier = Modifier.animateItem(),
                 date = date,
                 jobs = jobsForDate,
+                currentUserId = userId,
                 currentUserName = userName,
                 currentUserRole = userRole,
                 onJobClick = onJobClick
@@ -376,6 +378,7 @@ internal fun DaySection(
     modifier: Modifier = Modifier,
     date: LocalDate,
     jobs: List<Job>,
+    currentUserId: Long,
     currentUserName: String,
     currentUserRole: UserRole?,
     onJobClick: (Long) -> Unit
@@ -435,8 +438,11 @@ internal fun DaySection(
             }
         } else {
             jobs.forEach { job ->
-                val isAssigned =
-                    job.assignedWorkers?.contains(currentUserName, ignoreCase = true) == true
+                val isAssigned = job.assignedWorkers
+                    ?.split(",")
+                    ?.map { it.trim() }
+                    ?.contains(currentUserId.toString()) == true
+
                 val canEdit =
                     isAssigned || currentUserRole == UserRole.MANAGER || currentUserRole == UserRole.ADMIN
 
@@ -576,7 +582,7 @@ internal fun JobItem(
                 )
             }
 
-            if (!job.assignedWorkers.isNullOrBlank()) {
+            if (!job.assignedWorkerNames.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Row(
@@ -592,7 +598,7 @@ internal fun JobItem(
                     Spacer(modifier = Modifier.width(4.dp))
 
                     Text(
-                        text = job.assignedWorkers,
+                        text = job.assignedWorkerNames,
                         style = MaterialTheme.typography.bodySmall,
                         color = if (canEdit) {
                             MaterialTheme.colorScheme.onSurfaceVariant
@@ -601,6 +607,15 @@ internal fun JobItem(
                         }
                     )
                 }
+            } else if (!job.assignedWorkers.isNullOrBlank()) {
+                // Fallback if names are missing but IDs exist
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.assigned_workers_unavailable),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.padding(start = 18.dp)
+                )
             }
         }
     }

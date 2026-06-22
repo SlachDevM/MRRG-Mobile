@@ -14,6 +14,7 @@ fun JobDto.toDomain(): Job {
         jobDate = jobDate?.let { LocalDate.parse(it) },
         jobStartHour = jobStartHour,
         assignedWorkers = assignedWorkers,
+        assignedWorkerNames = assignedWorkerDetails?.joinToString(", ") { it.name },
         details = details,
         beforePhotos = beforePhotos,
         afterPhotos = afterPhotos,
@@ -36,6 +37,7 @@ fun Job.toDto(): JobDto {
         jobDate = jobDate?.toString(),
         jobStartHour = jobStartHour,
         assignedWorkers = assignedWorkers,
+        assignedWorkerDetails = null, // Backend only needs IDs for updates
         details = details,
         beforePhotos = beforePhotos,
         afterPhotos = afterPhotos,

@@ -12,6 +12,7 @@ data class Job(
     val jobDate: LocalDate? = null,
     val jobStartHour: String? = null,
     val assignedWorkers: String? = null,
+    val assignedWorkerNames: String? = null,
     val details: String? = null,
     val beforePhotos: List<String> = emptyList(),
     val afterPhotos: List<String> = emptyList(),

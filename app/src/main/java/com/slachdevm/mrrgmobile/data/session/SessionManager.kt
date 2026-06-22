@@ -10,6 +10,7 @@ class SessionManager(context: Context) {
 
     companion object {
         private const val USER_TOKEN = "user_token"
+        private const val USER_ID = "user_id"
         private const val USER_NAME = "user_name"
         private const val USER_ROLE = "user_role"
     }
@@ -22,6 +23,16 @@ class SessionManager(context: Context) {
 
     fun fetchAuthToken(): String? {
         return prefs.getString(USER_TOKEN, null)
+    }
+
+    fun saveUserId(userId: Long) {
+        val editor = prefs.edit()
+        editor.putLong(USER_ID, userId)
+        editor.apply()
+    }
+
+    fun fetchUserId(): Long {
+        return prefs.getLong(USER_ID, -1L)
     }
 
     fun saveUserName(name: String) {
@@ -52,6 +63,7 @@ class SessionManager(context: Context) {
     fun clearSession() {
         val editor = prefs.edit()
         editor.remove(USER_TOKEN)
+        editor.remove(USER_ID)
         editor.remove(USER_NAME)
         editor.remove(USER_ROLE)
         editor.apply()
