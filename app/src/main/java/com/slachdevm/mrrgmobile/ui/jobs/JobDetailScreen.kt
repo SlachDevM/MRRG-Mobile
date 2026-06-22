@@ -223,7 +223,8 @@ fun JobDetailScreen(
                         selectedPhotoType = PHOTO_TYPE_BEFORE
                         showPhotoSourceDialog = true
                     },
-                    onDeletePhoto = { viewModel.removePhoto(it, isBefore = true) }
+                    onDeletePhoto = { viewModel.removePhoto(it, isBefore = true) },
+                    enabled = true
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -235,7 +236,8 @@ fun JobDetailScreen(
                         selectedPhotoType = PHOTO_TYPE_AFTER
                         showPhotoSourceDialog = true
                     },
-                    onDeletePhoto = { viewModel.removePhoto(it, isBefore = false) }
+                    onDeletePhoto = { viewModel.removePhoto(it, isBefore = false) },
+                    enabled = job.beforePhotos.isNotEmpty()
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))

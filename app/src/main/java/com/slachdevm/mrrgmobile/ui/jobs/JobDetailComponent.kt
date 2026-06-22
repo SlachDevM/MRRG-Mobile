@@ -73,6 +73,8 @@ private fun WorkflowHint(job: Job) {
     val hint = when {
         job.status == JobStatus.SCHEDULED && job.beforePhotos.isEmpty() ->
             stringResource(R.string.hint_add_before_photo)
+        job.beforePhotos.isEmpty() ->
+            stringResource(R.string.hint_add_before_photo_first)
         job.status == JobStatus.IN_PROGRESS && job.afterPhotos.isEmpty() ->
             stringResource(R.string.hint_add_after_photo_required)
         else -> null

@@ -44,14 +44,16 @@ fun PhotoSection(
     title: String,
     photos: List<String>,
     onAddPhoto: () -> Unit,
-    onDeletePhoto: (String) -> Unit
+    onDeletePhoto: (String) -> Unit,
+    enabled: Boolean = true
 ) {
     var selectedPhoto by remember { mutableStateOf<String?>(null) }
 
     Column {
         PhotoSectionHeader(
             title = title,
-            onAddPhoto = onAddPhoto
+            onAddPhoto = onAddPhoto,
+            enabled = enabled
         )
 
         if (photos.isEmpty()) {
@@ -88,7 +90,8 @@ fun PhotoSection(
 @Composable
 private fun PhotoSectionHeader(
     title: String,
-    onAddPhoto: () -> Unit
+    onAddPhoto: () -> Unit,
+    enabled: Boolean
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -98,10 +101,18 @@ private fun PhotoSectionHeader(
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline
         )
-        IconButton(onClick = onAddPhoto) {
-            Icon(Icons.Default.AddAPhoto, contentDescription = stringResource(R.string.action_add_photo))
+        IconButton(
+            onClick = onAddPhoto,
+            enabled = enabled
+        ) {
+            Icon(
+                Icons.Default.AddAPhoto,
+                contentDescription = stringResource(R.string.action_add_photo),
+                tint = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+            )
         }
     }
 }
