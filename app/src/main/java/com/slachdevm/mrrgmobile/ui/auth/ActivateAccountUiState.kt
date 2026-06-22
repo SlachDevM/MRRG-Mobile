@@ -4,6 +4,8 @@ data class ActivateAccountUiState(
     val password: String = "",
     val confirmPassword: String = "",
     val isLoading: Boolean = false,
+    val isValidatingToken: Boolean = true,
+    val isTokenValid: Boolean = false,
     val isActivated: Boolean = false,
     val errorMessage: String? = null
 )

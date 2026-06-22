@@ -251,6 +251,7 @@ fun JobDetailScreen(
 
                 CompleteJobButton(
                     status = job.status,
+                    hasAfterPhoto = job.afterPhotos.isNotEmpty(),
                     isUpdating = state.isUpdating,
                     error = state.error,
                     onCompleteJob = viewModel::completeJob

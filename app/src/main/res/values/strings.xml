@@ -50,6 +50,8 @@
     <string name="action_save_notes">Save Notes</string>
     <string name="status_waiting_confirmation">Waiting for confirmation</string>
     <string name="action_complete">Complete</string>
+    <string name="hint_add_before_photo">Add a before photo to start the job.</string>
+    <string name="hint_add_after_photo_required">At least one after photo is required before completing the job.</string>
 
     <!-- PhotoSection -->
     <string name="no_photos_added">No photos added</string>

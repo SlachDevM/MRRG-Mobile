@@ -66,6 +66,21 @@ class AuthRepository(
         }
     }
 
+    suspend fun validateActivationToken(token: String): Result<Unit> {
+        return try {
+            val response = authApi.validateActivationToken(token)
+
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                val errorMessage = extractErrorMessage(response, "Invalid activation token")
+                Result.failure(Exception(errorMessage))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun activateAccount(
         token: String,
         password: String

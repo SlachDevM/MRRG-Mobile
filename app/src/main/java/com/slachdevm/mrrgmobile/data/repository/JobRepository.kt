@@ -1,6 +1,7 @@
 package com.slachdevm.mrrgmobile.data.repository
 
 import com.google.gson.Gson
+import com.google.gson.JsonParser
 import com.slachdevm.mrrgmobile.data.api.JobApi
 import com.slachdevm.mrrgmobile.data.dto.toDomain
 import com.slachdevm.mrrgmobile.data.dto.toDto
@@ -12,6 +13,7 @@ import com.slachdevm.mrrgmobile.data.local.mapper.toDomain
 import com.slachdevm.mrrgmobile.data.local.mapper.toEntity
 import com.slachdevm.mrrgmobile.data.model.DataSourceResult
 import com.slachdevm.mrrgmobile.domain.model.Job
+import retrofit2.Response
 import java.time.LocalDate
 
 class JobRepository(
@@ -58,9 +60,8 @@ class JobRepository(
                         )
                     )
                 } else {
-                    Result.failure(
-                        Exception("Failed to fetch scheduled jobs: ${response.code()}")
-                    )
+                    val errorMessage = extractErrorMessage(response, "Failed to fetch scheduled jobs")
+                    Result.failure(Exception(errorMessage))
                 }
             }
         } catch (e: Exception) {
@@ -97,7 +98,8 @@ class JobRepository(
                 if (cachedJob != null) {
                     Result.success(cachedJob)
                 } else {
-                    Result.failure(Exception("Failed to fetch job details: ${response.code()}"))
+                    val errorMessage = extractErrorMessage(response, "Failed to fetch job details")
+                    Result.failure(Exception(errorMessage))
                 }
             }
         } catch (e: Exception) {
@@ -117,7 +119,8 @@ class JobRepository(
             if (response.isSuccessful) {
                 Result.success(Unit)
             } else {
-                Result.failure(Exception("Failed to complete job: ${response.code()}"))
+                val errorMessage = extractErrorMessage(response, "Failed to complete job")
+                Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -136,7 +139,8 @@ class JobRepository(
 
                 Result.success(updatedJob)
             } else {
-                Result.failure(Exception("Failed to update job: ${response.code()}"))
+                val errorMessage = extractErrorMessage(response, "Failed to update job")
+                Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
             val localJob = job.copy(id = id)
@@ -162,6 +166,22 @@ class JobRepository(
             )
 
             Result.success(localJob)
+        }
+    }
+
+    private fun extractErrorMessage(response: Response<*>, fallbackMessage: String): String {
+        return try {
+            val errorBody = response.errorBody()?.string()
+            if (errorBody.isNullOrBlank()) {
+                fallbackMessage
+            } else if (errorBody.trim().startsWith("{")) {
+                val jsonObject = JsonParser.parseString(errorBody).asJsonObject
+                jsonObject.get("message")?.asString ?: fallbackMessage
+            } else {
+                errorBody
+            }
+        } catch (exception: Exception) {
+            fallbackMessage
         }
     }
 }

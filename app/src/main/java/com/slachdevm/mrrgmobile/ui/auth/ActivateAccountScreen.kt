@@ -40,6 +40,10 @@ fun ActivateAccountScreen(
 ) {
     val uiState by viewModel.uiStateFlow.collectAsState()
 
+    LaunchedEffect(token) {
+        viewModel.validateToken(token)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -65,83 +69,113 @@ fun ActivateAccountScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (uiState.isActivated) {
-                Text(
-                    text = stringResource(R.string.activate_account_success_title),
-                    style = MaterialTheme.typography.headlineMedium
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = stringResource(R.string.activate_account_success_message),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Button(
-                    onClick = onActivationSuccess,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.activate_account_back_to_login))
-                }
-            } else {
-                Text(
-                    text = stringResource(R.string.activate_account_heading),
-                    style = MaterialTheme.typography.headlineMedium
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = stringResource(R.string.activate_account_description),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                OutlinedTextField(
-                    value = uiState.password,
-                    onValueChange = viewModel::onPasswordChange,
-                    label = { Text(stringResource(R.string.activate_account_password_label)) },
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    value = uiState.confirmPassword,
-                    onValueChange = viewModel::onConfirmPasswordChange,
-                    label = { Text(stringResource(R.string.activate_account_confirm_password_label)) },
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                uiState.errorMessage?.let { errorMessage ->
+            when {
+                uiState.isValidatingToken -> {
+                    CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(16.dp))
-
                     Text(
-                        text = errorMessage,
-                        color = MaterialTheme.colorScheme.error,
+                        text = "Validating activation link...",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                uiState.isActivated -> {
+                    Text(
+                        text = stringResource(R.string.activate_account_success_title),
+                        style = MaterialTheme.typography.headlineMedium
+                    )
 
-                Button(
-                    onClick = { viewModel.activateAccount(token) },
-                    enabled = !uiState.isLoading,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    if (uiState.isLoading) {
-                        CircularProgressIndicator()
-                    } else {
-                        Text(stringResource(R.string.activate_account_button))
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = stringResource(R.string.activate_account_success_message),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Button(
+                        onClick = onActivationSuccess,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(stringResource(R.string.activate_account_back_to_login))
+                    }
+                }
+
+                !uiState.isTokenValid -> {
+                    Text(
+                        text = uiState.errorMessage ?: "Invalid activation link",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Button(
+                        onClick = onBackClick,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(stringResource(R.string.activate_account_back_to_login))
+                    }
+                }
+
+                else -> {
+                    Text(
+                        text = stringResource(R.string.activate_account_heading),
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = stringResource(R.string.activate_account_description),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    OutlinedTextField(
+                        value = uiState.password,
+                        onValueChange = viewModel::onPasswordChange,
+                        label = { Text(stringResource(R.string.activate_account_password_label)) },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        value = uiState.confirmPassword,
+                        onValueChange = viewModel::onConfirmPasswordChange,
+                        label = { Text(stringResource(R.string.activate_account_confirm_password_label)) },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    uiState.errorMessage?.let { errorMessage ->
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = errorMessage,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Button(
+                        onClick = { viewModel.activateAccount(token) },
+                        enabled = !uiState.isLoading,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        if (uiState.isLoading) {
+                            CircularProgressIndicator()
+                        } else {
+                            Text(stringResource(R.string.activate_account_button))
+                        }
                     }
                 }
             }

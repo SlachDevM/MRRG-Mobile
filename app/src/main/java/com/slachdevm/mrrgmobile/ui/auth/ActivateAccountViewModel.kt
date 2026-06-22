@@ -29,6 +29,42 @@ class ActivateAccountViewModel(
         )
     }
 
+    fun validateToken(token: String?) {
+        if (token.isNullOrBlank()) {
+            _uiStateFlow.value = _uiStateFlow.value.copy(
+                isValidatingToken = false,
+                isTokenValid = false,
+                errorMessage = "Activation link is invalid"
+            )
+            return
+        }
+
+        viewModelScope.launch {
+            _uiStateFlow.value = _uiStateFlow.value.copy(
+                isValidatingToken = true,
+                errorMessage = null
+            )
+
+            val result = authRepository.validateActivationToken(token)
+
+            result
+                .onSuccess {
+                    _uiStateFlow.value = _uiStateFlow.value.copy(
+                        isValidatingToken = false,
+                        isTokenValid = true,
+                        errorMessage = null
+                    )
+                }
+                .onFailure { exception ->
+                    _uiStateFlow.value = _uiStateFlow.value.copy(
+                        isValidatingToken = false,
+                        isTokenValid = false,
+                        errorMessage = exception.message ?: "Invalid activation token"
+                    )
+                }
+        }
+    }
+
     fun activateAccount(token: String?) {
         val currentState = _uiStateFlow.value
 

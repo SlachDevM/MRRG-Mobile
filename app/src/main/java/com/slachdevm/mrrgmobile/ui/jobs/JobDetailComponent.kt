@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -61,6 +63,42 @@ fun JobInfoSection(
     } else if (!job.assignedWorkers.isNullOrBlank()) {
         DetailItem(label = stringResource(R.string.label_assigned_workers), value = stringResource(R.string.assigned_workers_unavailable))
     }
+
+    Spacer(modifier = Modifier.height(8.dp))
+    WorkflowHint(job)
+}
+
+@Composable
+private fun WorkflowHint(job: Job) {
+    val hint = when {
+        job.status == JobStatus.SCHEDULED && job.beforePhotos.isEmpty() ->
+            stringResource(R.string.hint_add_before_photo)
+        job.status == JobStatus.IN_PROGRESS && job.afterPhotos.isEmpty() ->
+            stringResource(R.string.hint_add_after_photo_required)
+        else -> null
+    }
+
+    if (hint != null) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = hint,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary
+            )
+        }
+    }
 }
 
 @Composable
@@ -99,6 +137,7 @@ fun NotesSection(
 @Composable
 fun CompleteJobButton(
     status: JobStatus,
+    hasAfterPhoto: Boolean,
     isUpdating: Boolean,
     error: String?,
     onCompleteJob: () -> Unit
@@ -107,7 +146,7 @@ fun CompleteJobButton(
         return
     }
 
-    val completeEnabled = status != JobStatus.READY_FOR_CONFIRMATION && !isUpdating
+    val completeEnabled = status != JobStatus.READY_FOR_CONFIRMATION && hasAfterPhoto && !isUpdating
 
     Button(
         onClick = onCompleteJob,
