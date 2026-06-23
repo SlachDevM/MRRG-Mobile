@@ -224,7 +224,8 @@ fun JobDetailScreen(
                         showPhotoSourceDialog = true
                     },
                     onDeletePhoto = { viewModel.removePhoto(it, isBefore = true) },
-                    enabled = true
+                    enabled = true,
+                    keyNamespace = "before-photo"
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -237,7 +238,8 @@ fun JobDetailScreen(
                         showPhotoSourceDialog = true
                     },
                     onDeletePhoto = { viewModel.removePhoto(it, isBefore = false) },
-                    enabled = job.beforePhotos.isNotEmpty()
+                    enabled = job.beforePhotos.isNotEmpty(),
+                    keyNamespace = "after-photo"
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))

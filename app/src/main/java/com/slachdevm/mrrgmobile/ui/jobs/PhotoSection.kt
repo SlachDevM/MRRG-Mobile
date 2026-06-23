@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Close
@@ -45,7 +45,8 @@ fun PhotoSection(
     photos: List<String>,
     onAddPhoto: () -> Unit,
     onDeletePhoto: (String) -> Unit,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    keyNamespace: String = "photo"
 ) {
     var selectedPhoto by remember { mutableStateOf<String?>(null) }
 
@@ -64,10 +65,13 @@ fun PhotoSection(
             )
         } else {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(
+                itemsIndexed(
                     items = photos,
-                    key = { it.hashCode() }
-                ) { photoUrl ->
+                    key = { index, photoUrl ->
+                        val contentHash = photoUrl.hashCode()
+                        "$keyNamespace-$index-$contentHash"
+                    }
+                ) { index, photoUrl ->
                     PhotoThumbnail(
                         modifier = Modifier.animateItem(),
                         photoUrl = photoUrl,

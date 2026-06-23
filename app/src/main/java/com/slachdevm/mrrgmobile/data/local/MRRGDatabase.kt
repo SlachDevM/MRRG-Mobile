@@ -19,7 +19,7 @@ import com.slachdevm.mrrgmobile.data.local.entity.PendingSyncEntity
         UserProfileEntity::class,
         PendingSyncEntity::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 @TypeConverters(JobConverters::class)

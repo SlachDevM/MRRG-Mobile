@@ -133,7 +133,10 @@ fun NotificationScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(vertical = 8.dp)
                         ) {
-                            items(state.notifications) { notification ->
+                            items(
+                                items = state.notifications,
+                                key = { it.id }
+                            ) { notification ->
                                 NotificationItem(
                                     notification = notification,
                                     onClick = {
