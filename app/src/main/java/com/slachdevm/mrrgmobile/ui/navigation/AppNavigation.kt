@@ -95,6 +95,16 @@ fun AppNavigation(
         SyncRepository(RetrofitClient.jobApi, database.jobDao(), database.pendingSyncDao())
     }
 
+    // Set global auth error listener
+    LaunchedEffect(authRepository) {
+        RetrofitClient.setOnAuthErrorListener {
+            authRepository.logout()
+            navController.navigate(Routes.LOGIN) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
+
     // Global ViewModel for notification count
     val notificationViewModel = provideNotificationViewModel(notificationRepository)
 

@@ -6,6 +6,7 @@ import com.slachdevm.mrrgmobile.data.local.dao.UserProfileDao
 import com.slachdevm.mrrgmobile.data.local.mapper.toDomain
 import com.slachdevm.mrrgmobile.data.local.mapper.toEntity
 import com.slachdevm.mrrgmobile.data.util.ErrorUtils
+import com.slachdevm.mrrgmobile.data.util.SessionExpiredException
 
 class ProfileRepository(
     private val userApi: UserApi,
@@ -33,6 +34,7 @@ class ProfileRepository(
                 }
             }
         } catch (e: Exception) {
+            if (e is SessionExpiredException) return Result.failure(e)
             val cachedProfile = userProfileDao.getProfile()?.toDomain()
 
             if (cachedProfile != null) {

@@ -11,6 +11,7 @@ import com.slachdevm.mrrgmobile.data.local.dao.PendingSyncDao
 import com.slachdevm.mrrgmobile.data.local.entity.PendingSyncType
 import com.slachdevm.mrrgmobile.data.local.mapper.toEntity
 import com.slachdevm.mrrgmobile.data.util.ErrorUtils
+import com.slachdevm.mrrgmobile.data.util.SessionExpiredException
 
 class SyncRepository(
     private val jobApi: JobApi,
@@ -34,11 +35,15 @@ class SyncRepository(
                             )
                         }
                     }
-                }.onFailure { error ->
+                }.onFailure { throwable ->
+                    if (throwable is SessionExpiredException) {
+                        return Result.failure(throwable)
+                    }
+
                     pendingSyncDao.upsertPendingItem(
                         item.copy(
                             retryCount = item.retryCount + 1,
-                            lastError = error.message
+                            lastError = throwable.message
                         )
                     )
 
@@ -46,7 +51,7 @@ class SyncRepository(
                         Log.w(
                             TAG,
                             "Failed to sync ${item.type} for entity ${item.entityId}",
-                            error
+                            throwable
                         )
                     }
                 }

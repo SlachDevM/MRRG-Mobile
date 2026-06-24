@@ -12,6 +12,7 @@ import com.slachdevm.mrrgmobile.data.local.mapper.toDomain
 import com.slachdevm.mrrgmobile.data.local.mapper.toEntity
 import com.slachdevm.mrrgmobile.data.model.DataSourceResult
 import com.slachdevm.mrrgmobile.data.util.ErrorUtils
+import com.slachdevm.mrrgmobile.data.util.SessionExpiredException
 import com.slachdevm.mrrgmobile.domain.model.Job
 import java.time.LocalDate
 
@@ -64,6 +65,7 @@ class JobRepository(
                 }
             }
         } catch (e: Exception) {
+            if (e is SessionExpiredException) return Result.failure(e)
             val cachedJobs = jobDao.getScheduledJobs(startStr, endStr)
                 .map { it.toDomain() }
 
@@ -102,6 +104,7 @@ class JobRepository(
                 }
             }
         } catch (e: Exception) {
+            if (e is SessionExpiredException) return Result.failure(e)
             val cachedJob = jobDao.getJobById(id)?.toDomain()
 
             if (cachedJob != null) {
@@ -122,6 +125,7 @@ class JobRepository(
                 Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
+            if (e is SessionExpiredException) return Result.failure(e)
             Result.failure(e)
         }
     }
@@ -141,7 +145,9 @@ class JobRepository(
                 val errorMessage = ErrorUtils.extractErrorMessage(response, "Failed to update job")
                 Result.failure(Exception(errorMessage))
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            if (e is SessionExpiredException) return Result.failure(e)
+
             val localJob = job.copy(id = id)
 
             localJob.toEntity()?.let { jobDao.upsertJob(it) }

@@ -6,6 +6,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import com.slachdevm.mrrgmobile.BuildConfig
+import com.slachdevm.mrrgmobile.data.util.SessionExpiredException
 
 object RetrofitClient {
     const val BASE_URL = BuildConfig.BASE_URL
@@ -20,9 +21,14 @@ object RetrofitClient {
     const val BEARER_PREFIX = "Bearer "
 
     private var authToken: String? = null
+    private var onAuthErrorListener: (() -> Unit)? = null
 
     fun setAuthToken(token: String?) {
         authToken = token
+    }
+
+    fun setOnAuthErrorListener(listener: () -> Unit) {
+        onAuthErrorListener = listener
     }
 
     private val authInterceptor = Interceptor { chain ->
@@ -33,7 +39,14 @@ object RetrofitClient {
             requestBuilder.addHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + it)
         }
 
-        chain.proceed(requestBuilder.build())
+        val response = chain.proceed(requestBuilder.build())
+        
+        if ((response.code == 401 || response.code == 403) && authToken != null) {
+            onAuthErrorListener?.invoke()
+            throw SessionExpiredException()
+        }
+        
+        response
     }
 
     private val okHttpClient = OkHttpClient.Builder()
