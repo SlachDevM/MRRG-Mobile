@@ -78,6 +78,7 @@ Both the Android application and the React web application share the same Spring
 - Material 3 dynamic theming
 - Profile management
 - Settings
+- Automatic session expiration handling
 
 ---
 
@@ -111,7 +112,7 @@ Account Activated
       ▼
     Login
 ```
-The activation token is validated by the backend. Android only handles the user interface and forwards the activation request.
+The activation token is validated by the backend. Android only handles the activation workflow UI. Token validation and account activation are performed entirely by the backend.
 
 ---
 
@@ -162,9 +163,23 @@ Repository
          Return Room cache
 ```
 
-When the API is unavailable, repositories transparently fall back to the local cache.
+When network connectivity is unavailable, repositories transparently fall back to the local Room cache. Authentication failures (401/403) are treated differently: the local session is cleared and the user is returned to the login screen to prevent access to protected cached data.
 
 The UI remains unaware of the data source and only displays an offline indicator when cached data is shown.
+
+---
+
+## Security 
+
+MRRG-Mobile intentionally keeps business rules on the backend.
+
+Authentication is handled using JWT tokens issued by the Spring Boot backend.
+
+Sessions are automatically invalidated when the backend rejects authentication (401/403), preventing access to protected cached data.
+
+Android backups are disabled to prevent JWTs, cached jobs and synchronization data from being transferred to another device.
+
+Sensitive application data remains stored exclusively within the application's private storage.
 
 ---
 
@@ -192,14 +207,19 @@ Current implementation includes:
 - Failed synchronization tracking
 - Queue coalescing
 - Manual synchronization
+- Session-aware synchronization
 
 ---
 
 ## Push Notifications
 
-Notifications are persisted in PostgreSQL.
+Notifications are persisted in PostgreSQL and remain the authoritative notification store.
 
-Firebase Cloud Messaging is used only as a delivery layer.
+Firebase Cloud Messaging is used solely as a delivery layer.
+
+The backend never depends on Firebase delivery success.
+
+FCM delivery is not considered the source of truth.
 
 The backend never depends on Firebase delivery success.
 
